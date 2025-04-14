@@ -8,7 +8,7 @@ import { Counter } from "../typechain-types";
 import { ContractTransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe('Counter', function () {
+describe('Counter', () => {
   let counter: (Counter & { deploymentTransaction(): ContractTransactionResponse; });
   let accounts : HardhatEthersSigner[];
   let owner: HardhatEthersSigner;
@@ -20,7 +20,7 @@ describe('Counter', function () {
     const _accounts = await hre.ethers.getSigners()
     return {_counter, _accounts}
   }
-  beforeEach(async function () {
+  beforeEach(async () => {
     const {_counter, _accounts} = await loadFixture(deployFixture)
 
     counter    =_counter
@@ -28,24 +28,23 @@ describe('Counter', function () {
     owner     = accounts[0]
   });
 
-  it('Should deploy and set the owner correctly', async function () {
+  it('Should deploy and set the owner correctly', async () => {
     expect(await counter.owner()).to.equal(owner.address);
   })
   
-  it('Test is stateless', async function () {
+  it('Test is stateless', async () => {
     await counter.countUp()
     expect(await counter.counter()).to.equal(1);
   })
   
-  it('Test is stateless 2', async function () {
+  it('Test is stateless 2', async () => {
     await counter.countUp()
     await counter.countUp()
     expect(await counter.counter()).to.equal(2);
   })
   
-  it('Test is stateless 3', async function () {
+  it('Test is stateless 3', async () => {
     await counter.countUp()
     expect(await counter.counter()).to.equal(1);
   })
-  
 })
