@@ -11,12 +11,16 @@ describe('Auth', () => {
     let owner: HardhatEthersSigner;
 
     const deployFixture = async () => {
+        const AccessControl = await hre.ethers.getContractFactory('AccessControl')
+        const _accessControl = await AccessControl.deploy()
+
         const _accounts = await hre.ethers.getSigners()
-        return {_accounts}
+        return {_accessControl, _accounts}
     }
     beforeEach(async () => {
-        const {_accounts} = await loadFixture(deployFixture)
+        const {_accessControl, _accounts} = await loadFixture(deployFixture)
 
+        accessControl = _accessControl
         accounts  =_accounts
         owner     = accounts[0]
     });
