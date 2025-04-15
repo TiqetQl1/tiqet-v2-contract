@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { expect, assert } from "chai";
 import hre from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
@@ -25,12 +25,14 @@ describe('Auth', () => {
         owner     = accounts[0]
     });
 
-    it("Owner is set correctly",async ()=>{ 
-        //TODO...
+    it("Deployer is the owner",async ()=>{ 
+        assert(await accessControl._owner() == owner.address, "Owner is not the first signer")
     })
 
     it("Owner can change ownership",async ()=>{ 
-        //TODO...
+        await expect(accessControl.connect(accounts[5]).transferOwnership(accounts[4]), "NOT RESTRICTED ACCESS").to.reverted
+        await accessControl.transferOwnership(accounts[5].address)
+        expect(await accessControl._owner()).to.equal(accounts[5].address, "Owner is not changed to acc 5")
     })
 
     it("CRUD on admins",async ()=>{ 
