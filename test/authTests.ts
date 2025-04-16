@@ -36,46 +36,80 @@ describe('Auth', () => {
     })
 
     it("CRUD on admins",async ()=>{ 
-        //TODO...
+        // there is no admin
+        await expect(accessControl._admins(0)).to.reverted
+        // the addAdmin function returns true
+        expect(await accessControl.authAdminAdd(accounts[2].address)).to.equal(true, "the function doesnt return true")
+        // admin is added
+        expect(await accessControl._admins(0)).to.equal(accounts[2].address, "admin is not added")
+        // same for second admin
+        expect(await accessControl.authAdminAdd(accounts[5].address)).to.equal(true, "the 2nd function doesnt return true")
+        expect(await accessControl._admins(1)).to.equal(accounts[5].address, "2nd admin is not added")
+        // drop the first admin
+        expect(await accessControl.authAdminRem(accounts[2].address)).to.equal(true)
+        // check if dropped
+        expect(await accessControl._admins(0)).to.equal(accounts[5].address)
     })
 
     it("CRUD on proposers",async ()=>{ 
-        //TODO...
+        // there is no admin
+        await expect(accessControl._proposers(0)).to.reverted
+        // the addAdmin function returns true
+        expect(await accessControl.authProposerAdd(accounts[2].address)).to.equal(true, "the function doesnt return true")
+        // admin is added
+        expect(await accessControl._proposers(0)).to.equal(accounts[2].address, "admin is not added")
+        // same for second admin
+        expect(await accessControl.authProposerAdd(accounts[5].address)).to.equal(true, "the 2nd function doesnt return true")
+        expect(await accessControl._proposers(1)).to.equal(accounts[5].address, "2nd admin is not added")
+        // drop the first admin
+        expect(await accessControl.authProposerRem(accounts[2].address)).to.equal(true)
+        // check if dropped
+        expect(await accessControl._proposers(0)).to.equal(accounts[5].address)
     })
 
     it("CRUD on credible NFT collections",async ()=>{ 
-        //TODO...
+        // there is no admin
+        await expect(accessControl._nftList(0)).to.reverted
+        // the addAdmin function returns true
+        expect(await accessControl.authNftAdd(accounts[2].address)).to.equal(true, "the function doesnt return true")
+        // admin is added
+        expect(await accessControl._nftList(0)).to.equal(accounts[2].address, "admin is not added")
+        // same for second admin
+        expect(await accessControl.authNftAdd(accounts[5].address)).to.equal(true, "the 2nd function doesnt return true")
+        expect(await accessControl._nftList(1)).to.equal(accounts[5].address, "2nd admin is not added")
+        // drop the first admin
+        expect(await accessControl.authNftRem(accounts[2].address)).to.equal(true)
+        // check if dropped
+        expect(await accessControl._nftList(0)).to.equal(accounts[5].address)
     })
 
-    it("is_owner",async ()=>{ 
-        //TODO...
+    it("auth_is_owner",async ()=>{ 
+        expect(await accessControl.auth_is_owner(accounts[2].address)).to.equal(false)
+        expect(await accessControl.auth_is_owner(accounts[6].address)).to.equal(false)
+        expect(await accessControl.auth_is_owner(owner.address)).to.equal(true, "owner couldnt pass")
     })
 
-    it("is_admin",async ()=>{ 
-        //TODO...
+    it("auth_is_admin",async ()=>{ 
+        expect(await accessControl.auth_is_admin(accounts[2].address)).to.equal(false)
+        // !!! This line depends on authAdminAdd !!!
+        expect(accessControl.authAdminAdd(accounts[2].address)).to.equal(true)
+        expect(await accessControl.auth_is_admin(accounts[2].address)).to.equal(true)
     })
 
-    it("is_proposer",async ()=>{ 
-        //TODO...
+    it("auth_is_proposer",async ()=>{ 
+        expect(await accessControl.auth_is_proposer(accounts[2].address)).to.equal(false)
+        // !!! This line depends on authAdminAdd !!!
+        expect(accessControl.authProposerAdd(accounts[2].address)).to.equal(true)
+        expect(await accessControl.auth_is_proposer(accounts[2].address)).to.equal(true)
     })
 
-    it("has_nft",async ()=>{ 
-        //TODO...
-    })
+    it("auth_is_nftholder",async ()=>{ 
+        expect(await accessControl.auth_is_nftholder(accounts[2].address)).to.equal(false)
+        
+        const NFT = await hre.ethers.getContractFactory('TiQetNFT')
+        const nft = await NFT.deploy(owner.address)
+        await nft.safeMint(accounts[2].address, 0)
 
-    it("modifier: eq_owner", async ()=>{
-        //TODO...
-    })
-
-    it("modifier: gteq_admin",async ()=>{ 
-        //TODO...
-    })
-
-    it("modifier: gteq_proposer",async ()=>{ 
-        //TODO...
-    })
-
-    it("modifier: gteq_holder",async ()=>{ 
-        //TODO...
+        expect(await accessControl.auth_is_nftholder(accounts[2].address)).to.equal(true)
     })
 })
