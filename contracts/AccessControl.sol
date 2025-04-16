@@ -15,7 +15,7 @@ contract AccessControl {
     address public   _owner;
     address[] public _admins;
     address[] public _proposers;
-    address[]  public _nftList;
+    address[] public _nftList;
 
     //-------------------Constructor------------------//
     constructor() {
@@ -149,5 +149,41 @@ contract AccessControl {
         return false;
     }
 
-    
+    /// @notice Helper function for crud operations
+    /// @dev Finds a value's index in an array
+    /// @param needle address to find
+    /// @param heystack the array to be searched
+    /// @return uint256 `2^256-1` if not found, the index of value otherwise
+    function array_find(address needle, address[] storage heystack) internal returns(uint256){
+        uint256 len = heystack.length;
+        for (uint256 i = 0; i < len; i++) {
+            if(heystack[i]==needle){
+                return i;
+            }
+        }
+        return NOT_FOUND;
+    }
+    /// @notice Helper function for crud operations
+    /// @dev Adds a value to the end of an array
+    /// @param value address to add
+    /// @param arr the operand array
+    /// @return bool true if done
+    function array_add(address value, address[] storage arr) internal returns(bool){
+        arr.push(value);
+        return true;
+    }
+    /// @notice Helper function for crud operations
+    /// @dev Removes an index from an array, shifts back other values
+    /// @param index index to be removed
+    /// @param arr the operand array
+    /// @return bool true if done
+    function array_rem(uint256 index, address[] storage arr) internal returns(bool){
+        uint256 len = arr.length;
+        require(index < len, "409");
+        for (uint256 i = index; i < len-1; i++) {
+            arr[i] = arr[i + 1];
+        }
+        arr.pop();
+        return true;
+    }
 }
