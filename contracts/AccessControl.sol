@@ -76,6 +76,9 @@ contract AccessControl {
     /// @param operand address of the target user
     /// @return bool true if not reverted
     function authAdminAdd(address operand) external eq_owner returns(bool){
+        uint256 index = array_find(operand, _admins);
+        require(index==NOT_FOUND, "409");
+        array_add(operand, _admins);
         return true;
     }
 
@@ -84,6 +87,9 @@ contract AccessControl {
     /// @param operand address of the target user
     /// @return bool true if not reverted
     function authAdminRem(address operand) external eq_owner returns(bool){
+        uint256 index = array_find(operand, _admins);
+        require(index!=NOT_FOUND, "404");
+        array_rem(index, _admins);
         return true;
     }
 
@@ -92,6 +98,9 @@ contract AccessControl {
     /// @param operand address of the target user
     /// @return bool true if not reverted
     function authProposerAdd(address operand) external eq_owner returns(bool){
+        uint256 index = array_find(operand, _proposers);
+        require(index==NOT_FOUND, "409");
+        array_add(operand, _proposers);
         return true;
     }
 
@@ -100,6 +109,9 @@ contract AccessControl {
     /// @param operand address of the target user
     /// @return bool true if not reverted
     function authProposerRem(address operand) external eq_owner returns(bool){
+        uint256 index = array_find(operand, _proposers);
+        require(index!=NOT_FOUND, "404");
+        array_rem(index, _proposers);
         return true;
     }
 
@@ -108,6 +120,9 @@ contract AccessControl {
     /// @param operand address of the target user
     /// @return bool true if not reverted
     function authNftAdd(address operand) external eq_owner returns(bool){
+        uint256 index = array_find(operand, _nftList);
+        require(index==NOT_FOUND, "409");
+        array_add(operand, _nftList);
         return true;
     }
 
@@ -116,6 +131,9 @@ contract AccessControl {
     /// @param operand address of the target user
     /// @return bool true if not reverted
     function authNftRem(address operand) external eq_owner returns(bool){
+        uint256 index = array_find(operand, _nftList);
+        require(index!=NOT_FOUND, "404");
+        array_rem(index, _nftList);
         return true;
     }
 
