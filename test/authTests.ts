@@ -39,14 +39,14 @@ describe('Auth', () => {
         // there is no admin
         await expect(accessControl._admins(0)).to.reverted
         // the addAdmin function returns true
-        expect(await accessControl.authAdminAdd(accounts[2].address)).to.equal(true, "the function doesnt return true")
+        await expect(accessControl.authAdminAdd(accounts[2].address)).to.not.be.reverted
         // admin is added
         expect(await accessControl._admins(0)).to.equal(accounts[2].address, "admin is not added")
         // same for second admin
-        expect(await accessControl.authAdminAdd(accounts[5].address)).to.equal(true, "the 2nd function doesnt return true")
+        expect(await accessControl.authAdminAdd(accounts[5].address)).to.not.be.reverted
         expect(await accessControl._admins(1)).to.equal(accounts[5].address, "2nd admin is not added")
         // drop the first admin
-        expect(await accessControl.authAdminRem(accounts[2].address)).to.equal(true)
+        expect(await accessControl.authAdminRem(accounts[2].address)).to.not.be.reverted
         // check if dropped
         expect(await accessControl._admins(0)).to.equal(accounts[5].address)
     })
@@ -55,14 +55,14 @@ describe('Auth', () => {
         // there is no admin
         await expect(accessControl._proposers(0)).to.reverted
         // the addAdmin function returns true
-        expect(await accessControl.authProposerAdd(accounts[2].address)).to.equal(true, "the function doesnt return true")
+        await expect(accessControl.authProposerAdd(accounts[2].address)).to.not.be.reverted
         // admin is added
-        expect(await accessControl._proposers(0)).to.equal(accounts[2].address, "admin is not added")
+        expect(await accessControl._proposers(0)).to.equal(accounts[2].address, "proposer is not added")
         // same for second admin
-        expect(await accessControl.authProposerAdd(accounts[5].address)).to.equal(true, "the 2nd function doesnt return true")
-        expect(await accessControl._proposers(1)).to.equal(accounts[5].address, "2nd admin is not added")
+        expect(await accessControl.authProposerAdd(accounts[5].address)).to.not.be.reverted
+        expect(await accessControl._proposers(1)).to.equal(accounts[5].address, "2nd proposer is not added")
         // drop the first admin
-        expect(await accessControl.authProposerRem(accounts[2].address)).to.equal(true)
+        expect(await accessControl.authProposerRem(accounts[2].address)).to.not.be.reverted
         // check if dropped
         expect(await accessControl._proposers(0)).to.equal(accounts[5].address)
     })
@@ -71,14 +71,14 @@ describe('Auth', () => {
         // there is no admin
         await expect(accessControl._nftList(0)).to.reverted
         // the addAdmin function returns true
-        expect(await accessControl.authNftAdd(accounts[2].address)).to.equal(true, "the function doesnt return true")
+        await expect(accessControl.authNftAdd(accounts[2].address)).to.not.be.reverted
         // admin is added
-        expect(await accessControl._nftList(0)).to.equal(accounts[2].address, "admin is not added")
+        expect(await accessControl._nftList(0)).to.equal(accounts[2].address, "nft is not added")
         // same for second admin
-        expect(await accessControl.authNftAdd(accounts[5].address)).to.equal(true, "the 2nd function doesnt return true")
-        expect(await accessControl._nftList(1)).to.equal(accounts[5].address, "2nd admin is not added")
+        expect(await accessControl.authNftAdd(accounts[5].address)).to.not.be.reverted
+        expect(await accessControl._nftList(1)).to.equal(accounts[5].address, "2nd nft is not added")
         // drop the first admin
-        expect(await accessControl.authNftRem(accounts[2].address)).to.equal(true)
+        expect(await accessControl.authNftRem(accounts[2].address)).to.not.be.reverted
         // check if dropped
         expect(await accessControl._nftList(0)).to.equal(accounts[5].address)
     })
