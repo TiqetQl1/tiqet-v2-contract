@@ -147,14 +147,14 @@ contract AccessControl {
     /// @param check The address to be checked
     /// @return bool true if `check` is admin, and false otherwise
     function auth_is_admin(address check) public view returns(bool){
-        return false;
+        return array_find(check, _admins)!=NOT_FOUND;
     }
 
     /// @notice Will be used in modifiers
     /// @param check The address to be checked
     /// @return bool true if `check` is proposer, and false otherwise
     function auth_is_proposer(address check) public view returns(bool){
-        return false;
+        return array_find(check, _proposers)!=NOT_FOUND;
     }
 
     /// @notice Will be used in modifiers
