@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 /// @title AccessControl
 /// @notice The main contract to access control all contracts
@@ -173,7 +173,7 @@ contract AccessControl {
     function auth_is_nftholder(address check) internal view returns(bool){
         uint256 len = _nftList.length;
         for (uint256 i = 0; i < len; i++) {
-            IERC20 nft_contract = IERC20(_nftList[i]);
+            ERC721 nft_contract = ERC721(_nftList[i]);
             if (nft_contract.balanceOf(check) > 0){
                 return true;
             }
