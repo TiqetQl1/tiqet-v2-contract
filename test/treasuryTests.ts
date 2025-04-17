@@ -40,12 +40,12 @@ describe('Finance', () => {
         //TODO...
     })
 
-    it("Collect from addresses",async ()=>{ 
+    it("Give to addresses",async ()=>{ 
         assert(false)
         //TODO...
     })
 
-    it("Collect from addresses",async ()=>{ 
+    it("Total fund",async ()=>{ 
         assert(false)
         //TODO...
     })
