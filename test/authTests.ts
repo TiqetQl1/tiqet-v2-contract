@@ -92,14 +92,14 @@ describe('Auth', () => {
     it("auth_is_admin",async ()=>{ 
         expect(await accessControl.auth_is_admin(accounts[2].address)).to.equal(false)
         // !!! This line depends on authAdminAdd !!!
-        expect(accessControl.authAdminAdd(accounts[2].address)).to.equal(true)
+        await expect(accessControl.authAdminAdd(accounts[2].address)).to.not.be.reverted
         expect(await accessControl.auth_is_admin(accounts[2].address)).to.equal(true)
     })
 
     it("auth_is_proposer",async ()=>{ 
         expect(await accessControl.auth_is_proposer(accounts[2].address)).to.equal(false)
-        // !!! This line depends on authAdminAdd !!!
-        expect(accessControl.authProposerAdd(accounts[2].address)).to.equal(true)
+        // !!! This line depends on authProposerAdd !!!
+        await expect(accessControl.authProposerAdd(accounts[2].address)).to.not.be.reverted
         expect(await accessControl.auth_is_proposer(accounts[2].address)).to.equal(true)
     })
 
@@ -108,7 +108,12 @@ describe('Auth', () => {
         
         const NFT = await hre.ethers.getContractFactory('TiQetNFT')
         const nft = await NFT.deploy(owner.address)
+        const nft_address = await nft.getAddress()
         await nft.safeMint(accounts[2].address, 0)
+        
+        // !!! This line depends on authNftAdd !!!
+        await expect(accessControl.authNftAdd(nft_address)).to.not.be.reverted
+        expect(await accessControl._nftList(0)).to.equal(nft_address)
 
         expect(await accessControl.auth_is_nftholder(accounts[2].address)).to.equal(true)
     })
