@@ -37,7 +37,9 @@ contract AccessControl {
     /// @dev is_authorized is created for more consistency
     /// @dev reverts if not authorized
     modifier eqgt_admin {
-        bool is_authorized = auth_is_owner(msg.sender);
+        bool is_authorized = 
+            auth_is_owner(msg.sender)
+            || auth_is_admin(msg.sender);
         require(is_authorized, "403");
         _;
     }
@@ -46,16 +48,11 @@ contract AccessControl {
     /// @dev is_authorized is created for more consistency
     /// @dev reverts if not authorized
     modifier eqgt_proposer {
-        bool is_authorized = auth_is_owner(msg.sender);
-        require(is_authorized, "403");
-        _;
-    }
-
-    /// @notice Modifier to check if user is graterthan or equal to holders
-    /// @dev is_authorized is created for more consistency
-    /// @dev reverts if not authorized
-    modifier eqgt_holder {
-        bool is_authorized = auth_is_owner(msg.sender);
+        bool is_authorized = 
+            auth_is_owner(msg.sender)
+            || auth_is_admin(msg.sender)
+            || auth_is_proposer(msg.sender)
+            || auth_is_nftholder(msg.sender);
         require(is_authorized, "403");
         _;
     }
