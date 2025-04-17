@@ -116,5 +116,6 @@ describe('Auth', () => {
         expect(await accessControl._nftList(0)).to.equal(nft_address)
 
         expect(await accessControl.auth_is_nftholder(accounts[2].address)).to.equal(true)
+        expect(await accessControl.auth_is_nftholder(accounts[6].address)).to.equal(false)
     })
 })

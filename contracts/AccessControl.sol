@@ -161,6 +161,13 @@ contract AccessControl {
     /// @param check The address to be checked
     /// @return bool true if `check` has nft, and false otherwise
     function auth_is_nftholder(address check) public view returns(bool){
+        uint256 len = _nftList.length;
+        for (uint256 i = 0; i < len; i++) {
+            IERC20 nft_contract = IERC20(_nftList[i]);
+            if (nft_contract.balanceOf(check) > 0){
+                return true;
+            }
+        }
         return false;
     }
 
