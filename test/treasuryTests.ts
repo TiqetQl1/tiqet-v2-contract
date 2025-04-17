@@ -11,6 +11,9 @@ describe('Finance', () => {
     let accounts : HardhatEthersSigner[];
     let owner    : HardhatEthersSigner;
 
+    const balanceOf   = async (of: string) => await token.balanceOf(of)
+    const treasuryFund = async () => await balanceOf(await treasury.getAddress())
+
     const deployFixture = async () => {
         // Get accounts
         const _accounts = await hre.ethers.getSigners()
@@ -45,7 +48,7 @@ describe('Finance', () => {
         //TODO...
     })
 
-    it("Total fund",async ()=>{ 
+    it("Currency is changeable (and treasuryFund)",async ()=>{ 
         assert(false)
         //TODO...
     })
