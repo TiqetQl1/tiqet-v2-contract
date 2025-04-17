@@ -172,7 +172,7 @@ contract AccessControl {
     /// @param needle address to find
     /// @param heystack the array to be searched
     /// @return uint256 `2^256-1` if not found, the index of value otherwise
-    function array_find(address needle, address[] storage heystack) internal returns(uint256){
+    function array_find(address needle, address[] storage heystack) internal view returns(uint256){
         uint256 len = heystack.length;
         for (uint256 i = 0; i < len; i++) {
             if(heystack[i]==needle){
