@@ -134,33 +134,43 @@ contract AccessControl {
         return true;
     }
 
+    /// @notice Returns access level of `check`
+    /// @param check The address to check
+    /// @return string "owner"|"admin"|"proposer"|"user"
+    function authWhoami(address check) external view returns(string memory){
+        if(auth_is_owner(check)) return "owner";
+        if(auth_is_admin(check)) return "admin";
+        if(auth_is_proposer(check) || auth_is_nftholder(check)) return "proposer";
+        return "user";
+    }
+
     //----------------------Utils---------------------//
 
     /// @notice Will be used in modifiers
     /// @param check The address to be checked
     /// @return bool true if `check` is owner, and false otherwise
-    function auth_is_owner(address check) public view returns(bool){
+    function auth_is_owner(address check) internal view returns(bool){
         return _owner == check;
     }
 
     /// @notice Will be used in modifiers
     /// @param check The address to be checked
     /// @return bool true if `check` is admin, and false otherwise
-    function auth_is_admin(address check) public view returns(bool){
+    function auth_is_admin(address check) internal view returns(bool){
         return array_find(check, _admins)!=NOT_FOUND;
     }
 
     /// @notice Will be used in modifiers
     /// @param check The address to be checked
     /// @return bool true if `check` is proposer, and false otherwise
-    function auth_is_proposer(address check) public view returns(bool){
+    function auth_is_proposer(address check) internal view returns(bool){
         return array_find(check, _proposers)!=NOT_FOUND;
     }
 
     /// @notice Will be used in modifiers
     /// @param check The address to be checked
     /// @return bool true if `check` has nft, and false otherwise
-    function auth_is_nftholder(address check) public view returns(bool){
+    function auth_is_nftholder(address check) internal view returns(bool){
         uint256 len = _nftList.length;
         for (uint256 i = 0; i < len; i++) {
             IERC20 nft_contract = IERC20(_nftList[i]);

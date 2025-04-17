@@ -84,27 +84,27 @@ describe('Auth', () => {
     })
 
     it("auth_is_owner",async ()=>{ 
-        expect(await accessControl.auth_is_owner(accounts[2].address)).to.equal(false)
-        expect(await accessControl.auth_is_owner(accounts[6].address)).to.equal(false)
-        expect(await accessControl.auth_is_owner(owner.address)).to.equal(true, "owner couldnt pass")
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("user")
+        expect(await accessControl.authWhoami(accounts[6].address)).to.equal("user")
+        expect(await accessControl.authWhoami(owner.address)).to.equal("owner", "owner couldnt pass")
     })
 
     it("auth_is_admin",async ()=>{ 
-        expect(await accessControl.auth_is_admin(accounts[2].address)).to.equal(false)
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("user")
         // !!! This line depends on authAdminAdd !!!
         await expect(accessControl.authAdminAdd(accounts[2].address)).to.not.be.reverted
-        expect(await accessControl.auth_is_admin(accounts[2].address)).to.equal(true)
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("admin")
     })
 
     it("auth_is_proposer",async ()=>{ 
-        expect(await accessControl.auth_is_proposer(accounts[2].address)).to.equal(false)
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("user")
         // !!! This line depends on authProposerAdd !!!
         await expect(accessControl.authProposerAdd(accounts[2].address)).to.not.be.reverted
-        expect(await accessControl.auth_is_proposer(accounts[2].address)).to.equal(true)
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("proposer")
     })
 
     it("auth_is_nftholder",async ()=>{ 
-        expect(await accessControl.auth_is_nftholder(accounts[2].address)).to.equal(false)
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("user")
         
         const NFT = await hre.ethers.getContractFactory('TiQetNFT')
         const nft = await NFT.deploy(owner.address)
@@ -115,7 +115,7 @@ describe('Auth', () => {
         await expect(accessControl.authNftAdd(nft_address)).to.not.be.reverted
         expect(await accessControl._nftList(0)).to.equal(nft_address)
 
-        expect(await accessControl.auth_is_nftholder(accounts[2].address)).to.equal(true)
-        expect(await accessControl.auth_is_nftholder(accounts[6].address)).to.equal(false)
+        expect(await accessControl.authWhoami(accounts[2].address)).to.equal("proposer")
+        expect(await accessControl.authWhoami(accounts[6].address)).to.equal("user")
     })
 })
