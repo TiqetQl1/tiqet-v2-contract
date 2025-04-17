@@ -66,7 +66,7 @@ contract AccessControl {
     /// @dev Only current owner can call this function
     /// @param to The address of new owner
     /// @return bool true if not reverted
-    function transferOwnership(address to) external eq_owner returns(bool) {
+    function authOwnershipTransfer(address to) external eq_owner returns(bool) {
         _owner = to;
         return true;
     }

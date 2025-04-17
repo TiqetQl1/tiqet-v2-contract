@@ -30,8 +30,8 @@ describe('Auth', () => {
     })
 
     it("Owner can change ownership",async ()=>{ 
-        await expect(accessControl.connect(accounts[5]).transferOwnership(accounts[4]), "NOT RESTRICTED ACCESS").to.reverted
-        await accessControl.transferOwnership(accounts[5].address)
+        await expect(accessControl.connect(accounts[5]).authOwnershipTransfer(accounts[4]), "NOT RESTRICTED ACCESS").to.reverted
+        await accessControl.authOwnershipTransfer(accounts[5].address)
         expect(await accessControl._owner()).to.equal(accounts[5].address, "Owner is not changed to acc 5")
     })
 
