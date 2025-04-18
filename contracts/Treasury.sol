@@ -10,10 +10,16 @@ import "./AccessControl.sol";
 /// @dev Will be driven in the main contract
 contract Treasury is AccessControl {
 
-    ERC20 immutable public _token;
-    uint256 constant public _withdraw_threshold = 3000; // 1 is %0.01
+    /// @notice Address of the currency token 
+    ERC20 immutable public _treasury_token;
+    /// @notice Used to limit owners from withdrawing whole fund
+    /// @dev 1 means %0.01 of the total supply
+    uint256 constant public _treasury_withdraw_threshold = 3000;
+
+    /// @notice Constructor function
+    /// @param token Address of the currency token
     constructor(address token){
-        _token = ERC20(token);
+        _treasury_token = ERC20(token);
     }
 
     function treasury_collect(address from, uint256 amount) internal returns(bool) {
