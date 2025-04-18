@@ -13,7 +13,7 @@ contract Treasury is AccessControl {
     /// @notice Address of the currency token 
     ERC20 immutable public _treasury_token;
     /// @notice Used to limit owners from withdrawing whole fund
-    /// @dev 1 means %0.01 of the total supply
+    /// @dev 1 means %0.01 of the total supply in circulation
     uint256 constant public _treasury_withdraw_threshold = 3000;
 
     /// @notice Constructor function
@@ -50,7 +50,18 @@ contract Treasury is AccessControl {
         return _treasury_token.balanceOf(address(this));
     }
 
-    function treasuryWithdraw() public returns(bool){
+    /// @notice To withdraw overflowing tokens
+    /// @dev Will be reverted if totalSupply is below threshold
+    /// Only accesible by owner
+    /// Wont let tokens to go below threshold by withdrawing
+    /// @param amount The amount of tokens to be withdrawed
+    /// @return bool true if not reverted
+    function treasuryWithdraw(uint256 amount) public eq_owner returns(bool){
+        uint256 burned_tokens = _treasury_token.balanceOf(address(0));
+        uint256 total_supply  = _treasury_token.totalSupply() - burned_tokens;
+        uint256 threshold     = (total_supply / 10_000) * _treasury_withdraw_threshold;
+        require(treasuryFund()-amount >= threshold, "412"); // below threshold
+        _treasury_token.transfer(msg.sender, amount);
         return true;
     }
 }
