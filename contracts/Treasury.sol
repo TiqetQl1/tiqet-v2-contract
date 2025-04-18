@@ -22,7 +22,15 @@ contract Treasury is AccessControl {
         _treasury_token = ERC20(token);
     }
 
+    /// @notice Fucntion to take money from buyers wallets
+    /// @dev The contract should be approved for the ttransfer
+    /// @param from the address to collect tokens from
+    /// @param amount amount of tokens to be transfered
+    /// @return bool true if not reverted
     function treasury_collect(address from, uint256 amount) internal returns(bool) {
+        require(_treasury_token.allowance(from, address(this)) >= amount, "412");
+        require(_treasury_token.balanceOf(from) >= amount, "412");
+        _treasury_token.transferFrom(from, address(this), amount);
         return true;
     }
 
