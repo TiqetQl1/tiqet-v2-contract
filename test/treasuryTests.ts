@@ -70,7 +70,8 @@ describe('Finance', () => {
         await expect(treasury.treasuryWithdraw(2)).to.be.reverted
         // Adding money to zero address wont affect the percentage
         // (Now 90 percent of the total supply is in zero address)
-        await token.mint(ZeroAddress, 90_000_000)
+        await token.mint(owner, 90_000_000)
+        await token.burn(90_000_000)
         // And normal user dont access this function
         await expect(treasury.connect(accounts[2]).treasuryWithdraw(1)).to.be.reverted
         // But the owner successfully withdraws 1
