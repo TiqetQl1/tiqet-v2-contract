@@ -44,8 +44,10 @@ contract Treasury is AccessControl {
         return true;
     }
 
+    /// @notice To get current balance of this contract
+    /// @return uint256 amount of tokens owned by this contract
     function treasuryFund() public view returns(uint256){
-        return _token.balanceOf(address(this));
+        return _treasury_token.balanceOf(address(this));
     }
 
     function treasuryWithdraw() public returns(bool){
