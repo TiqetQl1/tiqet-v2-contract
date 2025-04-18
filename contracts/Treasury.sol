@@ -29,12 +29,18 @@ contract Treasury is AccessControl {
     /// @return bool true if not reverted
     function treasury_collect(address from, uint256 amount) internal returns(bool) {
         require(_treasury_token.allowance(from, address(this)) >= amount, "412");
-        require(_treasury_token.balanceOf(from) >= amount, "412");
+        require(_treasury_token.balanceOf(from) >= amount, "417");
         _treasury_token.transferFrom(from, address(this), amount);
         return true;
     }
 
+    /// @notice Function to transfer money to addresses
+    /// @param to The address to collect transfer tokens to
+    /// @param amount amount of tokens to be transfered
+    /// @return bool true if not reverted
     function treasury_give(address to, uint256 amount) internal returns(bool) {
+        require(treasuryFund() >= amount, "507");
+        _treasury_token.transfer(to, amount);
         return true;
     }
 
