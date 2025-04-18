@@ -2,17 +2,14 @@ import { expect, assert } from "chai";
 import hre from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { ContractTransactionResponse } from "ethers";
-import { TiQetCoin, Treasury } from "../typechain-types";
+import { ContractTransactionResponse, ZeroAddress } from "ethers";
+import { TiQetCoin, TreasuryTestWrapper } from "../typechain-types";
 
 describe('Finance', () => {
     let token    : TiQetCoin & { deploymentTransaction(): ContractTransactionResponse };
-    let treasury : Treasury  & { deploymentTransaction(): ContractTransactionResponse };
+    let treasury : TreasuryTestWrapper  & { deploymentTransaction(): ContractTransactionResponse };
     let accounts : HardhatEthersSigner[];
     let owner    : HardhatEthersSigner;
-
-    const balanceOf   = async (of: string) => await token.balanceOf(of)
-    const treasuryFund = async () => await balanceOf(await treasury.getAddress())
 
     const deployFixture = async () => {
         // Get accounts
@@ -21,12 +18,8 @@ describe('Finance', () => {
         const Token = await hre.ethers.getContractFactory('TiQetCoin')
         const _token = await Token.deploy(_accounts[0].address)
         // Deploy treasury contract
-        const Treasury = await hre.ethers.getContractFactory('Treasury')
-        const _treasury = await Treasury.deploy()
-        // Disturbute tokens
-        _token.mint(await _treasury.getAddress(), 10_000)
-        _token.mint(_accounts[2].address, 10_000)
-        _token.mint(_accounts[6].address, 10_000)
+        const Treasury = await hre.ethers.getContractFactory('TreasuryTestWrapper')
+        const _treasury = await Treasury.deploy(await _token.getAddress())
         return {_token, _treasury, _accounts}
     }
     beforeEach(async () => {
@@ -38,23 +31,50 @@ describe('Finance', () => {
         owner    = accounts[0]
     });
 
-    it("Collect from addresses",async ()=>{ 
-        assert(false)
-        //TODO...
+    it("Collect from addresses (treasury_collenct)",async ()=>{ 
+        await token.mint(accounts[2], 10_000)
+        await token.connect(accounts[2]).approve(treasury, 100)
+        await expect(treasury.treasury_collect_wrapper(accounts[2], 100))
+            .to.changeTokenBalances(token, [treasury,accounts[2]], [+100, -100])
     })
 
-    it("Give to addresses",async ()=>{ 
-        assert(false)
-        //TODO...
+    it("Give to addresses (treasury_give)",async ()=>{ 
+        await token.mint(treasury, 10_000)
+        await expect(treasury.treasury_give_wrapper(accounts[2], 100))
+            .to.changeTokenBalances(token, [treasury, accounts[2]], [-100, 100])
     })
 
-    it("Currency is changeable (and treasuryFund)",async ()=>{ 
-        assert(false)
-        //TODO...
+    it("Total money in the treasury (treasuryFund)",async ()=>{ 
+        assert(await treasury.treasuryFund() == await token.balanceOf(treasury))
+        await token.mint(treasury, 10_000)
+        assert(await treasury.treasuryFund() == await token.balanceOf(treasury))
     })
 
-    it("Withdraw money when fund is in the right range", async ()=>{
-        assert(false)
-        //TODO...
+    /*
+     *  fund should be over some percent of the total supply in circulation
+     *  only by owner
+     *  shouldnt be able to make fund under the percentage
+     *  shouldnt count owned by 0x0..0 as in circulation
+     *  treasuryWithdraw, treasuryFund, treasury_give
+     */
+    it("treasuryWithdraw when fund over threshold", async ()=>{
+        // Gets withdraw percent
+        expect(await treasury._treasury_withdraw_threshold()).to.be.above(0)
+        const percent = Number(await treasury._treasury_withdraw_threshold())/100
+        // Not possible when even 1 token below percent
+        await token.mint(accounts[2], (10_000*(100-percent))+1)
+        await token.mint(treasury ,   (10_000*(percent))-1)
+        await expect(treasury.treasuryWithdraw(1)).to.be.reverted
+        // Fails to withdraw 2 when 1 above percent
+        await token.connect(accounts[2]).transfer(treasury, 2)
+        await expect(treasury.treasuryWithdraw(2)).to.be.reverted
+        // Adding money to zero address wont affect the percentage
+        // (Now 90 percent of the total supply is in zero address)
+        await token.mint(ZeroAddress, 90_000_000)
+        // And normal user dont access this function
+        await expect(treasury.connect(accounts[2]).treasuryWithdraw(1)).to.be.reverted
+        // But the owner successfully withdraws 1
+        await expect(treasury.treasuryWithdraw(1))
+            .to.changeTokenBalances(token, [owner, treasury], [1, -1])
     })
 })
