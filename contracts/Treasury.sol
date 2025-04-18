@@ -10,10 +10,10 @@ import "./AccessControl.sol";
 /// @dev Will be driven in the main contract
 contract Treasury is AccessControl {
 
-    ERC20 public token;
-
-    function treasurySetTokenAddress(address value) external returns(bool) {
-        token = ERC20(value);
+    ERC20 immutable public _token;
+    uint256 constant public _withdraw_threshold = 3000; // 1 is %0.01
+    constructor(address token){
+        _token = ERC20(token);
     }
 
     function treasury_collect(address from, uint256 amount) internal returns(bool) {
@@ -25,6 +25,10 @@ contract Treasury is AccessControl {
     }
 
     function treasuryFund() public view returns(uint256){
-        return token.balanceOf(address(this));
+        return _token.balanceOf(address(this));
+    }
+
+    function treasuryWithdraw() public returns(bool){
+        return true;
     }
 }
