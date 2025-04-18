@@ -25,8 +25,8 @@ describe('Finance', () => {
         const _treasury = await Treasury.deploy()
         // Disturbute tokens
         _token.mint(await _treasury.getAddress(), 10_000)
-        _token.mint(accounts[2].address, 10_000)
-        _token.mint(accounts[6].address, 10_000)
+        _token.mint(_accounts[2].address, 10_000)
+        _token.mint(_accounts[6].address, 10_000)
         return {_token, _treasury, _accounts}
     }
     beforeEach(async () => {
