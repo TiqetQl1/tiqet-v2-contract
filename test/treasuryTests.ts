@@ -52,4 +52,9 @@ describe('Finance', () => {
         assert(false)
         //TODO...
     })
+
+    it("Withdraw money when fund is in the right range", async ()=>{
+        assert(false)
+        //TODO...
+    })
 })
