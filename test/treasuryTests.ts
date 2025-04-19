@@ -3,11 +3,11 @@ import hre from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { ContractTransactionResponse, ZeroAddress } from "ethers";
-import { TiQetCoin, TreasuryTestWrapper } from "../typechain-types";
+import { TestERC20Token, TestTreasuryWrapper } from "../typechain-types";
 
 describe('Finance', () => {
-    let token    : TiQetCoin & { deploymentTransaction(): ContractTransactionResponse };
-    let treasury : TreasuryTestWrapper  & { deploymentTransaction(): ContractTransactionResponse };
+    let token    : TestERC20Token       & { deploymentTransaction(): ContractTransactionResponse };
+    let treasury : TestTreasuryWrapper  & { deploymentTransaction(): ContractTransactionResponse };
     let accounts : HardhatEthersSigner[];
     let owner    : HardhatEthersSigner;
 
@@ -15,10 +15,10 @@ describe('Finance', () => {
         // Get accounts
         const _accounts = await hre.ethers.getSigners()
         // Deploy token contract
-        const Token = await hre.ethers.getContractFactory('TiQetCoin')
+        const Token = await hre.ethers.getContractFactory('TestERC20Token')
         const _token = await Token.deploy(_accounts[0].address)
         // Deploy treasury contract
-        const Treasury = await hre.ethers.getContractFactory('TreasuryTestWrapper')
+        const Treasury = await hre.ethers.getContractFactory('TestTreasuryWrapper')
         const _treasury = await Treasury.deploy(await _token.getAddress())
         return {_token, _treasury, _accounts}
     }

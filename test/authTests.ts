@@ -106,7 +106,7 @@ describe('Auth', () => {
     it("auth_is_nftholder",async ()=>{ 
         expect(await accessControl.authWhoami(accounts[2].address)).to.equal("user")
         
-        const NFT = await hre.ethers.getContractFactory('TiQetNFT')
+        const NFT = await hre.ethers.getContractFactory('TestERC721Token')
         const nft = await NFT.deploy(owner.address)
         const nft_address = await nft.getAddress()
         await nft.safeMint(accounts[2].address, 0)

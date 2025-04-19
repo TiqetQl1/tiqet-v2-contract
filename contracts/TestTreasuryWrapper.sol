@@ -6,7 +6,7 @@ import "./Treasury.sol";
 /// @title TreasuryTestWrapper
 /// @notice to test the internal functions of the main contract
 /// @dev WONT be in production
-contract TreasuryTestWrapper is Treasury{
+contract TestTreasuryWrapper is Treasury{
     
     constructor(address token) 
         Treasury(token)

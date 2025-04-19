@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
-contract TiQetCoin is ERC20, ERC20Burnable, Ownable, ERC20Permit {
+contract TestERC20Token is ERC20, ERC20Burnable, Ownable, ERC20Permit {
     constructor(address initialOwner)
-        ERC20("TiQetCoin", "TQC")
+        ERC20("TestERC20Token", "TQC")
         Ownable(initialOwner)
         ERC20Permit("TiQetCoin")
     {}
