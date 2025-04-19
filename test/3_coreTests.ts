@@ -36,8 +36,50 @@ describe('BettingSystem', () => {
         accounts =_accounts
         owner    = accounts[0]
     });
+    
+    describe('Privileged users :', () => {
+        it("Propose bets", async () => {
+            assert(false)
+            // TODO
+        })
 
-    it("hi", async () => {
-        assert(true)
+        it("Accept or reject bets", async () => {
+            assert(false)
+            // TODO
+        })
+
+        it("End or DisQ bet", async () => {
+            assert(false)
+            // TODO
+        })
+    })
+    
+    describe('Normal users :', () => {
+        it("Bet on Options", async () => {
+            assert(false)
+            // TODO
+        })
+
+        it("Claim on win", async () => {
+            assert(false)
+            // TODO
+        })
+        
+        it("Refund on DisQ", async () => {
+            assert(false)
+            // TODO
+        })
+    })
+
+    describe('Client app :', () => {
+        it("Access bet meta from event", async () => {
+            assert(false)
+            // TODO
+        })
+        
+        it("Can access bet meta from event", async () => {
+            assert(false)
+            // TODO
+        })
     })
 })
