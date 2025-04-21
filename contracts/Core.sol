@@ -3,7 +3,48 @@ pragma solidity ^0.8.20;
 
 import "./AccessControl.sol";
 import "./Treasury.sol";
+import "./BetUtils.sol";
 
 contract Core is AccessControl, Treasury{
+    using BetUtils for BetUtils.Event;
+
     constructor (address token) Treasury(token) {}
+
+    BetUtils.Event[] registry;
+    mapping(address => BetUtils.Wager[]) wagers;
+
+    function eventPropose(
+        string calldata title,
+        string calldata description,
+        string[] calldata outcomes
+    ) external {}
+    function eventAccept(
+        uint256 eventId,
+        uint256 max_per_one_bet,
+        uint256 fake_liq_per_outcome
+    ) external {}
+    function eventReject(
+        uint256 eventId,
+        string calldata reason
+    ) external {}
+    function eventWager(
+        uint256 eventId,
+        uint256 outcome, 
+        uint256 stake
+    ) external {}
+    function eventDisq(
+        uint256 eventId,
+        string calldata reason
+    ) external {}
+    function eventResolve(
+        uint256 winner,
+        string calldata description
+    ) external {}
+
+    function wagerClaim(
+        uint256 wagerId
+    ) external {}
+    function wagerRefund(
+        uint256 wagerId
+    ) external {}
 }
