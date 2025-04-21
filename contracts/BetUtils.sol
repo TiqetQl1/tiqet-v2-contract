@@ -7,10 +7,9 @@ library BetUtils {
     uint256 constant DECIMALS = 1_000;
 
     enum EventState {
-        Pending, 
-        Accepted,
+        Pending,
         Opened,
-        Finished,
+        Paused,
         Resolved,
         Rejected,
         Disqualified
