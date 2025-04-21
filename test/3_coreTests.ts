@@ -24,7 +24,7 @@ describe('BettingSystem', () => {
         const _nft   = await TestERC721Token.deploy(_accounts[0])
         const _token = await TestERC20Token.deploy(_accounts[0])
         const _qusdt = await TestERC20Token.deploy(_accounts[0])
-        const _core  = await Core.deploy(await _token.getAddress())
+        const _core  = await Core.deploy(await _token.getAddress(), await _qusdt.getAddress())
         // Return
         return {_token, _qusdt, _nft, _core, _accounts}
     }

@@ -8,7 +8,7 @@ import "./BetUtils.sol";
 contract Core is AccessControl, Treasury{
     using BetUtils for BetUtils.Event;
 
-    constructor (address token) Treasury(token) {}
+    constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
     BetUtils.Event[] events;
     mapping(address => BetUtils.Wager[]) wagers;

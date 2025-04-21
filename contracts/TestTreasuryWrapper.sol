@@ -8,15 +8,23 @@ import "./Treasury.sol";
 /// @dev WONT be in production
 contract TestTreasuryWrapper is Treasury{
     
-    constructor(address token) 
-        Treasury(token)
+    constructor(address token, address qusdt) 
+        Treasury(token, qusdt)
         {}
 
-    function treasury_collect_wrapper(address from, uint256 amount) public returns(bool){
-        return treasury_collect(from, amount);
+    function treasury_token_collect_wrapper(address from, uint256 amount) public returns(bool){
+        return treasury_token_collect(from, amount);
     }
 
-    function treasury_give_wrapper(address to, uint256 amount) public returns(bool){
-        return treasury_give(to, amount);
+    function treasury_token_give_wrapper(address to, uint256 amount) public returns(bool){
+        return treasury_token_give(to, amount);
+    }
+
+    function treasury_qusdt_collect_wrapper(address from, uint256 amount) public returns(bool){
+        return treasury_qusdt_collect(from, amount);
+    }
+
+    function treasury_qusdt_give_wrapper(address to, uint256 amount) public returns(bool){
+        return treasury_qusdt_give(to, amount);
     }
 }
