@@ -37,25 +37,40 @@ describe('BettingSystem', () => {
         owner    = accounts[0]
     });
     
-    describe('Privileged users :', () => {
-        it("Propose bets", async () => {
+    describe('Events (Privileged users) :', () => {
+        it("Propose", async () => {
             assert(false)
             // TODO
         })
 
-        it("Accept or reject bets", async () => {
+        it("Accept", async () => {
             assert(false)
             // TODO
         })
 
-        it("End or DisQ bet", async () => {
+        it("Reject", async () => {
+            assert(false)
+            // TODO
+        })
+
+        it("Toggle pause", async () => {
+            assert(false)
+            // TODO
+        })
+
+        it("End", async () => {
+            assert(false)
+            // TODO
+        })
+
+        it("Disq", async () => {
             assert(false)
             // TODO
         })
     })
     
     describe('Normal users :', () => {
-        it("Bet on Options", async () => {
+        it("Place wager", async () => {
             assert(false)
             // TODO
         })
@@ -77,7 +92,7 @@ describe('BettingSystem', () => {
             // TODO
         })
         
-        it("Can access bet meta from event", async () => {
+        it("Access wager meta", async () => {
             assert(false)
             // TODO
         })
