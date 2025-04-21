@@ -6,6 +6,7 @@ import { ContractTransactionResponse } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 describe('BettingSystem', () => {
+    let qusdt    : TestERC20Token   & { deploymentTransaction(): ContractTransactionResponse };
     let token    : TestERC20Token   & { deploymentTransaction(): ContractTransactionResponse };
     let nft      : TestERC721Token  & { deploymentTransaction(): ContractTransactionResponse };
     let core     : Core & { deploymentTransaction(): ContractTransactionResponse };
@@ -22,15 +23,17 @@ describe('BettingSystem', () => {
         // Make instances
         const _nft   = await TestERC721Token.deploy(_accounts[0])
         const _token = await TestERC20Token.deploy(_accounts[0])
+        const _qusdt = await TestERC20Token.deploy(_accounts[0])
         const _core  = await Core.deploy(await _token.getAddress())
         // Return
-        return {_token, _nft, _core, _accounts}
+        return {_token, _qusdt, _nft, _core, _accounts}
     }
     beforeEach(async () => {
         // Revert snapshot
-        const {_nft, _token, _core, _accounts} = await loadFixture(deployFixture)
+        const {_nft, _qusdt, _token, _core, _accounts} = await loadFixture(deployFixture)
         // Ready to use
         nft      = _nft
+        qusdt    = _qusdt
         token    = _token
         core     = _core
         accounts =_accounts
