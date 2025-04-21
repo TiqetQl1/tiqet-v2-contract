@@ -101,6 +101,11 @@ describe('Finance', () => {
 
     it("treasuryQUSDTWithdraw", async ()=>{
         await qusdt.mint(treasury, 10_000)
+        // not by admins
+        await treasury.authAdminAdd(accounts[2]);
+        await expect(treasury.connect(accounts[2]).treasuryQUSDTWithdraw(100))
+            .to.be.reverted;
+        // only by owner
         await expect(treasury.treasuryQUSDTWithdraw(100))
             .to.changeTokenBalances(qusdt, [treasury, owner], [-100, 100])
     })
