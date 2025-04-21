@@ -12,6 +12,11 @@ contract Core is AccessControl, Treasury{
 
     BetUtils.Event[] events;
     mapping(address => BetUtils.Wager[]) wagers;
+    uint256 _proposal_fee;
+
+    function configProposalFee(
+        uint256 amount_in_qusdt
+    ) external {}
 
     function eventPropose(
         string calldata title,
@@ -21,18 +26,20 @@ contract Core is AccessControl, Treasury{
     function eventAccept(
         uint256 event_id,
         uint256 max_per_one_bet,
-        uint256 fake_liq_per_outcome
+        uint256 fake_liq_per_outcome,
+        string calldata description
     ) external {}
     function eventTogglePause(
-        uint256 event_id
+        uint256 event_id,
+        string calldata description
     ) external {}
     function eventReject(
         uint256 event_id,
-        string calldata reason
+        string calldata description
     ) external {}
     function eventDisq(
         uint256 event_id,
-        string calldata reason
+        string calldata description
     ) external {}
     function eventResolve(
         uint256 winner,

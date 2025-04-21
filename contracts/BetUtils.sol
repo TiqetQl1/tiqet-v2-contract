@@ -22,6 +22,7 @@ library BetUtils {
         uint256 k;
         uint256 handle;
         uint256 winner;
+        uint256 fee_paid;
         uint256 vig; // 1 means 0.01%
         uint256 end_time;
         address creator;
