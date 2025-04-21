@@ -10,7 +10,7 @@ contract Core is AccessControl, Treasury{
 
     constructor (address token) Treasury(token) {}
 
-    BetUtils.Event[] registry;
+    BetUtils.Event[] events;
     mapping(address => BetUtils.Wager[]) wagers;
 
     function eventPropose(
@@ -19,21 +19,16 @@ contract Core is AccessControl, Treasury{
         string[] calldata outcomes
     ) external {}
     function eventAccept(
-        uint256 eventId,
+        uint256 event_id,
         uint256 max_per_one_bet,
         uint256 fake_liq_per_outcome
     ) external {}
     function eventReject(
-        uint256 eventId,
+        uint256 event_id,
         string calldata reason
     ) external {}
-    function eventWager(
-        uint256 eventId,
-        uint256 outcome, 
-        uint256 stake
-    ) external {}
     function eventDisq(
-        uint256 eventId,
+        uint256 event_id,
         string calldata reason
     ) external {}
     function eventResolve(
@@ -41,10 +36,15 @@ contract Core is AccessControl, Treasury{
         string calldata description
     ) external {}
 
+    function wagerPlace(
+        uint256 event_id,
+        uint256 outcome, 
+        uint256 amount
+    ) external {}
     function wagerClaim(
-        uint256 wagerId
+        uint256 wager_id
     ) external {}
     function wagerRefund(
-        uint256 wagerId
+        uint256 wager_id
     ) external {}
 }
