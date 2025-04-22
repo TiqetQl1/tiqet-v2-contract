@@ -61,6 +61,19 @@ describe('BettingSystem', () => {
         accounts =_accounts;
         [owner, admin, proposer, holder] = accounts
     });
+
+    const propose = async (by: HardhatEthersSigner, accept: boolean) => {
+        await qusdt.mint(by, fee)
+        await expect(core.connect(by).eventPropose("holders's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+    }
+
+    const accept = async (index: number) => {
+        const M = 1000;
+        const MAX_PER_BET = 20;
+        const VIG = 100;
+        const END_TIME = 325546864;
+        await core.eventAccept(index, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")
+    }
     
     it("Read and write fee amount", async ()=>{
         await expect(core.configProposalFee(100)).to.not.be.reverted
