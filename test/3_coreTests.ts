@@ -13,7 +13,10 @@ describe('BettingSystem', () => {
     let nft      : Cntrct<TestERC721Token>
     let core     : Cntrct<Core>
     let accounts : HardhatEthersSigner[];
-    let owner    : HardhatEthersSigner;
+    let owner : HardhatEthersSigner;
+    let admin : HardhatEthersSigner;
+    let proposer : HardhatEthersSigner;
+    let holder : HardhatEthersSigner;
 
     const deployFixture = async () => {
         // Accounts
@@ -38,15 +41,21 @@ describe('BettingSystem', () => {
         qusdt    = _qusdt
         token    = _token
         core     = _core
-        accounts =_accounts
-        owner    = accounts[0]
+        accounts =_accounts;
+        [owner, admin, proposer, holder] = accounts
     });
     
+    it("Read and write fee amount", ()=>{
+        await expect(core.configProposalFee(100)).to.not.be.reverted
+        expect(await core._proposal_fee()).to.equal(100)
+    })
+
     describe('Events (Privileged users) :', () => {
         it("Propose", async () => {
             // Every non user should be able to propose with enough qusdt
-            const [admin, proposer, holder, ..._] = accounts
+            await expect(core.configProposalFee(100)).to.not.be.reverted
             const fee = await core._proposal_fee()
+            expect(fee).to.be.greaterThan(0)
             // admin
             await qusdt.mint(admin, fee)
             await qusdt.connect(admin).approve(core, fee)
@@ -73,8 +82,9 @@ describe('BettingSystem', () => {
         })
 
         it("Accept", async () => {
-            assert(false)
-            // TODO
+            //admins shouldnt be able to
+            const admin = 
+            //owner
         })
 
         it("Reject", async () => {
