@@ -7,6 +7,15 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 type Cntrct<T> = T & { deploymentTransaction(): ContractTransactionResponse }
 
+enum EventState {
+    "Pending",
+    "Opened",
+    "Paused",
+    "Resolved",
+    "Rejected",
+    "Disqualified"
+}
+
 describe('BettingSystem', () => {
     let qusdt    : Cntrct<TestERC20Token>
     let token    : Cntrct<TestERC20Token>
@@ -17,6 +26,7 @@ describe('BettingSystem', () => {
     let admin : HardhatEthersSigner;
     let proposer : HardhatEthersSigner;
     let holder : HardhatEthersSigner;
+    const fee = 100
 
     const deployFixture = async () => {
         // Accounts
@@ -32,9 +42,11 @@ describe('BettingSystem', () => {
         const _core  = await Core.deploy(await _token.getAddress(), await _qusdt.getAddress())
         // Build some state
         // owner = acc 0
-        await core.authAdminAdd(accounts[1])
-        await core.authProposerAdd(accounts[2])
-        await nft.safeMint(accounts[3],0)
+        await core.authAdminAdd(_accounts[1])
+        await core.authProposerAdd(_accounts[2])
+        await nft.safeMint(_accounts[3],0)
+        // add fee
+        core.configProposalFee(fee)
         // Return
         return {_token, _qusdt, _nft, _core, _accounts}
     }
@@ -58,9 +70,6 @@ describe('BettingSystem', () => {
     describe('Events (Privileged users) :', () => {
         it("Propose", async () => {
             // Every non user should be able to propose with enough qusdt
-            await expect(core.configProposalFee(100)).to.not.be.reverted
-            const fee = await core._proposal_fee()
-            expect(fee).to.be.greaterThan(0)
             // admin
             await qusdt.mint(admin, fee)
             await qusdt.connect(admin).approve(core, fee)
@@ -76,11 +85,11 @@ describe('BettingSystem', () => {
             // owner
             await qusdt.mint(owner, fee)
             // not enough fund
-            await qusdt.approve(core, fee-1n)
-            await expect(core.eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.be.reverted
+            await qusdt.approve(core, fee-1)
+            await expect(core.eventPropose("Failed event", "desc\r\ndesc",["1: one", "2: two"])).to.be.reverted
             // ok
             await qusdt.approve(core, fee)
-            await expect(core.eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            await expect(core.eventPropose("owners event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
         })
 
         it("Accept", async () => {
