@@ -30,6 +30,7 @@ describe('BettingSystem', () => {
     let admin : HardhatEthersSigner;
     let proposer : HardhatEthersSigner;
     let holder : HardhatEthersSigner;
+    let users : HardhatEthersSigner[];
     const fee = 100
 
     const deployFixture = async () => {
@@ -63,7 +64,7 @@ describe('BettingSystem', () => {
         token    = _token
         core     = _core
         accounts =_accounts;
-        [owner, admin, proposer, holder] = accounts
+        [owner, admin, proposer, holder, ...users] = accounts
     });
 
     const propose = async (by : HardhatEthersSigner = owner ) => {
@@ -181,30 +182,57 @@ describe('BettingSystem', () => {
             propose()
             accept(0)
             const user = accounts[4];
-            token.mint(user, MAX_PER_BET*2)
-            token.connect(user).approve(core, MAX_PER_BET*2)
+            token.mint(user, MAX_PER_BET*10)
+            token.connect(user).approve(core, MAX_PER_BET*10)
             //over the limit per bet
             await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET+1)).to.be.reverted
             //zero amount error
             await expect(core.connect(user).wagerPlace(0, 1, 0)).to.be.reverted
+            //option not valid
+            await expect(core.connect(user).wagerPlace(0, 2, MAX_PER_BET))
             //not possible when bet on pause
             await core.eventTogglePause(0, "") // This pauses
             await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET)).to.be.reverted
             //ok
             await core.eventTogglePause(0, "") // This opens
-            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET)).to.not.be.reverted
-            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET-1)).to.not.be.reverted
-            await expect(core.connect(user).wagerPlace(0, 0, MAX_PER_BET/2)).to.not.be.reverted
+            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET))
+                .to.changeTokenBalances(token, [core, user], [+MAX_PER_BET,-MAX_PER_BET])
+            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET-1))
+                .to.changeTokenBalances(token, [core, user], [+MAX_PER_BET-1,-MAX_PER_BET+1])
+            await expect(core.connect(user).wagerPlace(0, 0, MAX_PER_BET/2))
+                .to.changeTokenBalances(token, [core, user], [+MAX_PER_BET/2,-MAX_PER_BET/2])
         })
 
         it("Claim on win", async () => {
-            assert(false)
-            // TODO
+            propose()
+            accept(0)
+            buy(users[0],0,1, MAX_PER_BET/1)
+            buy(users[0],0,0, MAX_PER_BET/2)
+            buy(users[1],0,0, MAX_PER_BET/3)
+            buy(users[2],0,1, MAX_PER_BET/4)
+            const bef = users.slice(0, 2).map((user)=> token.balanceOf(user))
+            const before = await Promise.all(bef)
+            // not ended
+            await expect(core.connect(users[0]).wagerClaim(0)).to.be.reverted
+            await core.eventResolve(0, 1, "2nd option won")
+            await expect(core.connect(users[0]).wagerClaim(0)).to.not.be.reverted
+            await expect(core.connect(users[1]).wagerClaim(0)).to.not.be.reverted
+            await expect(core.connect(users[2]).wagerClaim(0)).to.not.be.reverted
+            expect(await token.balanceOf(users[0])).to.not.be.equal(before[0]) // won some
+            expect(await token.balanceOf(users[1])).to.be.equal(before[1])     // not won
+            expect(await token.balanceOf(users[2])).to.not.be.equal(before[2]) // won all
         })
         
         it("Refund on DisQ", async () => {
-            assert(false)
-            // TODO
+            propose()
+            accept(0)
+            buy(users[0], 0,0 ,MAX_PER_BET)
+            buy(users[0], 0,0 ,MAX_PER_BET)
+            await core.eventDisq(0, "Wasnt cool")
+            const amount = 
+                (await core._wagers(0,users[0],0)).amount 
+                + (await core._wagers(0,users[0],1)).amount
+            await expect(core.wagerRefund).to.changeTokenBalances(token, [core, users[0]], [-amount, amount])
         })
     })
 

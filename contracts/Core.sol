@@ -11,7 +11,8 @@ contract Core is AccessControl, Treasury{
     constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
     BetUtils.Event[] public _events;
-    mapping(address => BetUtils.Wager[]) public _wagers;
+    // event_id => msg.sender => [wager_id]
+    mapping(uint256=>mapping(address => BetUtils.Wager[])) public _wagers;
     uint256 public _proposal_fee;
 
     function configProposalFee(
@@ -55,7 +56,7 @@ contract Core is AccessControl, Treasury{
         uint256 amount
     ) external {}
     function wagerClaim(
-        uint256 wager_id
+        uint256 event_id
     ) external {}
     function wagerRefund(
         uint256 wager_id
