@@ -133,7 +133,6 @@ describe('BettingSystem', () => {
             //admins ok
             await expect(core.connect(admin).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
             const bet = await core._events(0)
-            await expect(bet.fee_paid).to.be.equal(FEE)
             await expect(bet.vig).to.be.equal(VIG)
             await expect(bet.end_time).to.be.equal(END_TIME)
             await expect(bet.max_per_one_bet).to.be.equal(MAX_PER_BET)

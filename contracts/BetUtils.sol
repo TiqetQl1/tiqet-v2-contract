@@ -20,8 +20,10 @@ library BetUtils {
     
 
     struct Proposal{
-        uint256 id;
-        string meta;
+        uint256 proposal_id;
+        address creator;
+        string meta_text;
+        uint256 fee_paid;
         PoposalState state;
     }
     struct Event{
@@ -32,10 +34,8 @@ library BetUtils {
         uint256 k;
         uint256 handle;
         uint256 winner;
-        uint256 fee_paid;
         uint256 vig; // 1 means 0.01%
         uint256 end_time;
-        address creator;
         EventState state;
     }
     struct Wager{
@@ -52,9 +52,10 @@ library BetUtils {
     );
 
     event EventProposed(
-        uint256 indexed id,
+        uint256 indexed proposal_id,
         address indexed creator,
-        string proposal_text
+        string text,
+        uint256 fee_paid
     );
     event EventAccepted(
         uint256 indexed proposal_id,

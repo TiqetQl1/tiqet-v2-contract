@@ -19,7 +19,7 @@ contract Core is AccessControl, Treasury{
     string  public          _events_metas;
     /// @notice array of wagers made by a wallet on an event
     mapping(uint256=>mapping(address => BetUtils.Wager[])) public _wagers;
-    
+
     /// @notice fee needed to make new proposal
     /// @dev in qusdt
     uint256 public _proposal_fee;
@@ -35,8 +35,24 @@ contract Core is AccessControl, Treasury{
     }
 
     function eventPropose(
-        string calldata metas
-    ) external {}
+        string calldata description
+    ) external eqgt_proposer {
+        treasury_qusdt_collect(msg.sender, _proposal_fee);
+        uint256 index = proposals.length;
+        proposals.push(BetUtils.Proposal(
+            index,
+            msg.sender,
+            description,
+            _proposal_fee,
+            BetUtils.PoposalState.Pending
+        ));
+        emit BetUtils.EventProposed(
+            index,
+            msg.sender,
+            description,
+            _proposal_fee
+        );
+    }
     function eventAccept(
         uint256 event_id,
         uint256 max_per_one_bet,
