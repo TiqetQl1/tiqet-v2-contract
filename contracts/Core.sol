@@ -10,8 +10,8 @@ contract Core is AccessControl, Treasury{
 
     constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
-    BetUtils.Event[] events;
-    mapping(address => BetUtils.Wager[]) wagers;
+    BetUtils.Event[] public _events;
+    mapping(address => BetUtils.Wager[]) public _wagers;
     uint256 public _proposal_fee;
 
     function configProposalFee(
