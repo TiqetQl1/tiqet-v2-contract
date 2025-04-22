@@ -30,6 +30,11 @@ describe('BettingSystem', () => {
         const _token = await TestERC20Token.deploy(_accounts[0])
         const _qusdt = await TestERC20Token.deploy(_accounts[0])
         const _core  = await Core.deploy(await _token.getAddress(), await _qusdt.getAddress())
+        // Build some state
+        // owner = acc 0
+        await core.authAdminAdd(accounts[1])
+        await core.authProposerAdd(accounts[2])
+        await nft.safeMint(accounts[3],0)
         // Return
         return {_token, _qusdt, _nft, _core, _accounts}
     }
@@ -45,7 +50,7 @@ describe('BettingSystem', () => {
         [owner, admin, proposer, holder] = accounts
     });
     
-    it("Read and write fee amount", ()=>{
+    it("Read and write fee amount", async ()=>{
         await expect(core.configProposalFee(100)).to.not.be.reverted
         expect(await core._proposal_fee()).to.equal(100)
     })
@@ -59,17 +64,14 @@ describe('BettingSystem', () => {
             // admin
             await qusdt.mint(admin, fee)
             await qusdt.connect(admin).approve(core, fee)
-            await core.authAdminAdd(admin)
             await expect(core.connect(admin).eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
             // proposer
             await qusdt.mint(proposer, fee)
             await qusdt.connect(proposer).approve(core, fee)
-            await core.authProposerAdd(proposer)
             await expect(core.connect(proposer).eventPropose("proposers's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
             // holder
             await qusdt.mint(holder, fee)
             await qusdt.connect(holder).approve(core, fee)
-            await nft.safeMint(holder,0)
             await expect(core.connect(holder).eventPropose("holders's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
             // owner
             await qusdt.mint(owner, fee)
@@ -82,9 +84,11 @@ describe('BettingSystem', () => {
         })
 
         it("Accept", async () => {
-            //admins shouldnt be able to
-            const admin = 
-            //owner
+            //proposers shoudnt be able
+            proposer
+            //admins ok
+            
+            //owner ok
         })
 
         it("Reject", async () => {
