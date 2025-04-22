@@ -62,7 +62,7 @@ describe('BettingSystem', () => {
         [owner, admin, proposer, holder] = accounts
     });
 
-    const propose = async (by: HardhatEthersSigner, accept: boolean) => {
+    const propose = async (by : HardhatEthersSigner = owner ) => {
         await qusdt.mint(by, fee)
         await expect(core.connect(by).eventPropose("holders's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
     }
@@ -136,8 +136,10 @@ describe('BettingSystem', () => {
         })
 
         it("Toggle pause", async () => {
-            assert(false)
-            // TODO
+            await propose()
+            await accept(0)
+            await expect(core.connect(holder).eventTogglePause(0, "Temporory")).to.be.reverted
+            await expect(core.connect(admin).eventTogglePause(0, "Temporory")).to.not.be.reverted
         })
 
         it("End", async () => {
