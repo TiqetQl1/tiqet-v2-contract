@@ -12,7 +12,7 @@ contract Core is AccessControl, Treasury{
 
     BetUtils.Event[] events;
     mapping(address => BetUtils.Wager[]) wagers;
-    uint256 _proposal_fee;
+    uint256 public _proposal_fee;
 
     function configProposalFee(
         uint256 amount_in_qusdt
