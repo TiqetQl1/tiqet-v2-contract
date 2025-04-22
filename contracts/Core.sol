@@ -44,6 +44,7 @@ contract Core is AccessControl, Treasury{
         string calldata description
     ) external {}
     function eventResolve(
+        uint256 event_id,
         uint256 winner,
         string calldata description
     ) external {}

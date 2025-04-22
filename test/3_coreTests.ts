@@ -125,6 +125,7 @@ describe('BettingSystem', () => {
             await expect(bet.k).to.be.equal(M**2)
             //owner ok
             await expect(core.eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
+            //TODO possible only in Pending state
         })
 
         it("Reject", async () => {
@@ -133,6 +134,7 @@ describe('BettingSystem', () => {
             await expect(core.connect(holder).eventReject(0, "Such a shame")).to.be.reverted
             await expect(core.connect(admin).eventReject(0, "Such a shame")).to.not.be.reverted
             await expect(core.eventReject(0, "Such a shame")).to.not.be.reverted
+            //TODO possible only in Pernding state
         })
 
         it("Toggle pause", async () => {
@@ -140,16 +142,31 @@ describe('BettingSystem', () => {
             await accept(0)
             await expect(core.connect(holder).eventTogglePause(0, "Temporory")).to.be.reverted
             await expect(core.connect(admin).eventTogglePause(0, "Temporory")).to.not.be.reverted
+            //TODO possible only in running state
         })
 
-        it("End", async () => {
-            assert(false)
-            // TODO
+        it("Resolve", async () => {
+            await propose()
+            await propose()
+            await accept(0)
+            await accept(1)
+            await core.eventTogglePause(1, "test") // should be ok either way
+            await expect(core.connect(holder).eventResolve(1, 1, "Won")).to.be.reverted
+            await expect(core.connect(admin).eventResolve(0, 1, "Won")).to.not.be.reverted
+            await expect(core.connect(owner).eventResolve(1, 1, "Won")).to.not.be.reverted
+            //TODO possible only in running/paused state
         })
 
         it("Disq", async () => {
-            assert(false)
-            // TODO
+            await propose()
+            await propose()
+            await accept(0)
+            await accept(1)
+            await core.eventTogglePause(1, "test") // should be ok either way
+            await expect(core.connect(holder).eventDisq(1, "Won")).to.be.reverted
+            await expect(core.connect(admin).eventDisq(0, "Won")).to.not.be.reverted
+            await expect(core.connect(owner).eventDisq(1, "Won")).to.not.be.reverted
+            //TODO possible only in running/paused state
         })
     })
     
