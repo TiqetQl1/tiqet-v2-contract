@@ -7,6 +7,10 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 type Cntrct<T> = T & { deploymentTransaction(): ContractTransactionResponse }
 
+const M = 1000;
+const MAX_PER_BET = 20;
+const VIG = 100;
+const END_TIME = 325546864;
 enum EventState {
     "Pending",
     "Opened",
@@ -68,11 +72,13 @@ describe('BettingSystem', () => {
     }
 
     const accept = async (index: number) => {
-        const M = 1000;
-        const MAX_PER_BET = 20;
-        const VIG = 100;
-        const END_TIME = 325546864;
         await core.eventAccept(index, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")
+    }
+
+    const buy = async (wallet: HardhatEthersSigner = owner, event_id: number, option: number, amount: number) => {
+        await token.mint(wallet,  amount)
+        await token.approve(core, amount)
+        await core.connect(wallet).wagerPlace(event_id, option, amount)
     }
     
     it("Read and write fee amount", async ()=>{
@@ -83,6 +89,10 @@ describe('BettingSystem', () => {
     describe('Events (Privileged users) :', () => {
         it("Propose", async () => {
             // Every non user should be able to propose with enough qusdt
+            // user
+            await qusdt.mint(accounts[5], fee)
+            await qusdt.connect(accounts[5]).approve(core, fee)
+            await expect(core.connect(accounts[5]).eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.be.reverted
             // admin
             await qusdt.mint(admin, fee)
             await qusdt.connect(admin).approve(core, fee)
@@ -110,10 +120,6 @@ describe('BettingSystem', () => {
             await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
             await core.eventPropose("2nd event", "desc\r\ndesc",["1: one", "2: two"])
             //proposers shouldnt be able
-            const M = 1000;
-            const MAX_PER_BET = 20;
-            const VIG = 100;
-            const END_TIME = 325546864;
             await expect(core.connect(proposer).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")).to.be.reverted
             //admins ok
             await expect(core.connect(admin).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
@@ -172,9 +178,23 @@ describe('BettingSystem', () => {
     
     describe('Normal users :', () => {
         it("Place wager", async () => {
-            //Cand when paused 
-            assert(false)
-            // TODO
+            propose()
+            accept(0)
+            const user = accounts[4];
+            token.mint(user, MAX_PER_BET*2)
+            token.connect(user).approve(core, MAX_PER_BET*2)
+            //over the limit per bet
+            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET+1)).to.be.reverted
+            //zero amount error
+            await expect(core.connect(user).wagerPlace(0, 1, 0)).to.be.reverted
+            //not possible when bet on pause
+            await core.eventTogglePause(0, "") // This pauses
+            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET)).to.be.reverted
+            //ok
+            await core.eventTogglePause(0, "") // This opens
+            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET)).to.not.be.reverted
+            await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET-1)).to.not.be.reverted
+            await expect(core.connect(user).wagerPlace(0, 0, MAX_PER_BET/2)).to.not.be.reverted
         })
 
         it("Claim on win", async () => {
