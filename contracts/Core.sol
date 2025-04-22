@@ -27,6 +27,8 @@ contract Core is AccessControl, Treasury{
         uint256 event_id,
         uint256 max_per_one_bet,
         uint256 fake_liq_per_outcome,
+        uint256 vig,
+        uint256 end_time,
         string calldata description
     ) external {}
     function eventTogglePause(

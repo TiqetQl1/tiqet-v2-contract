@@ -93,11 +93,25 @@ describe('BettingSystem', () => {
         })
 
         it("Accept", async () => {
-            //proposers shoudnt be able
-            proposer
+            // Depends on propose !!!!!
+            await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
+            await core.eventPropose("2nd event", "desc\r\ndesc",["1: one", "2: two"])
+            //proposers shouldnt be able
+            const M = 1000;
+            const MAX_PER_BET = 20;
+            const VIG = 100;
+            const END_TIME = 325546864;
+            await expect(core.connect(proposer).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")).to.be.reverted
             //admins ok
-            
+            await expect(core.connect(admin).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
+            const bet = await core._events(0)
+            await expect(bet.fee_paid).to.be.equal(fee)
+            await expect(bet.vig).to.be.equal(VIG)
+            await expect(bet.end_time).to.be.equal(END_TIME)
+            await expect(bet.max_per_one_bet).to.be.equal(MAX_PER_BET)
+            await expect(bet.k).to.be.equal(M**2)
             //owner ok
+            await expect(core.eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
         })
 
         it("Reject", async () => {

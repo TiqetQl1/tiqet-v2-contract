@@ -18,6 +18,7 @@ library BetUtils {
     struct Event{
         uint256 id;
         uint256 options_count;
+        uint256 max_per_one_bet;
         uint256[] m;
         uint256 k;
         uint256 handle;
