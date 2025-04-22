@@ -10,27 +10,40 @@ contract Core is AccessControl, Treasury{
 
     constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
+    /// @notice will hold all proposals, accepted or not
+    BetUtils.Proposal[] proposals;
+
+    /// @notice holds states and data thats needed contract side
     BetUtils.Event[] public _events;
-    // event_id => msg.sender => [wager_id]
+    /// @notice Holds title, desciptions, options and other frontend infos
+    string  public          _events_metas;
+    /// @notice array of wagers made by a wallet on an event
     mapping(uint256=>mapping(address => BetUtils.Wager[])) public _wagers;
+    
+    /// @notice fee needed to make new proposal
+    /// @dev in qusdt
     uint256 public _proposal_fee;
 
     function configProposalFee(
         uint256 amount_in_qusdt
-    ) external {}
+    ) external eqgt_admin {
+        emit BetUtils.FeeChanged(
+            _proposal_fee, 
+            amount_in_qusdt
+            );
+        _proposal_fee = amount_in_qusdt;
+    }
 
     function eventPropose(
-        string calldata title,
-        string calldata description,
-        string[] calldata outcomes
+        string calldata metas
     ) external {}
     function eventAccept(
         uint256 event_id,
         uint256 max_per_one_bet,
-        uint256 fake_liq_per_outcome,
+        uint256 fake_liq_per_option,
         uint256 vig,
         uint256 end_time,
-        string calldata description
+        string calldata metas
     ) external {}
     function eventTogglePause(
         uint256 event_id,
@@ -52,7 +65,7 @@ contract Core is AccessControl, Treasury{
 
     function wagerPlace(
         uint256 event_id,
-        uint256 outcome, 
+        uint256 option, 
         uint256 amount
     ) external {}
     function wagerClaim(
@@ -60,5 +73,10 @@ contract Core is AccessControl, Treasury{
     ) external {}
     function wagerRefund(
         uint256 wager_id
+    ) external {}
+
+    function clientPagination(
+        uint256 per_page,
+        uint256 start_index
     ) external {}
 }

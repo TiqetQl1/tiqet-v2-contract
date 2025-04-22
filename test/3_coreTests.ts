@@ -7,18 +7,25 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 type Cntrct<T> = T & { deploymentTransaction(): ContractTransactionResponse }
 
+const PROPOSAL = {
+    "title":"Test",
+    "desc" : "ends in this circumstances by this time",
+    "options":[
+        {
+            "id": "1",
+            "title":"First",
+        },
+        {
+            "id": "2",
+            "title":"Second",
+        },
+    ]
+}
+const PROPOSAL_TEXT = JSON.stringify(PROPOSAL)
 const M = 1000;
 const MAX_PER_BET = 20;
 const VIG = 100;
 const END_TIME = 325546864;
-enum EventState {
-    "Pending",
-    "Opened",
-    "Paused",
-    "Resolved",
-    "Rejected",
-    "Disqualified"
-}
 
 describe('BettingSystem', () => {
     let qusdt    : Cntrct<TestERC20Token>
@@ -69,7 +76,7 @@ describe('BettingSystem', () => {
 
     const propose = async (by : HardhatEthersSigner = owner ) => {
         await qusdt.mint(by, fee)
-        await expect(core.connect(by).eventPropose("holders's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+        await expect(core.connect(by).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
     }
 
     const accept = async (index: number) => {
@@ -93,33 +100,33 @@ describe('BettingSystem', () => {
             // user
             await qusdt.mint(accounts[5], fee)
             await qusdt.connect(accounts[5]).approve(core, fee)
-            await expect(core.connect(accounts[5]).eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.be.reverted
+            await expect(core.connect(accounts[5]).eventPropose(PROPOSAL_TEXT)).to.be.reverted
             // admin
             await qusdt.mint(admin, fee)
             await qusdt.connect(admin).approve(core, fee)
-            await expect(core.connect(admin).eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            await expect(core.connect(admin).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
             // proposer
             await qusdt.mint(proposer, fee)
             await qusdt.connect(proposer).approve(core, fee)
-            await expect(core.connect(proposer).eventPropose("proposers's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            await expect(core.connect(proposer).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
             // holder
             await qusdt.mint(holder, fee)
             await qusdt.connect(holder).approve(core, fee)
-            await expect(core.connect(holder).eventPropose("holders's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            await expect(core.connect(holder).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
             // owner
             await qusdt.mint(owner, fee)
             // not enough fund
             await qusdt.approve(core, fee-1)
-            await expect(core.eventPropose("Failed event", "desc\r\ndesc",["1: one", "2: two"])).to.be.reverted
+            await expect(core.eventPropose(PROPOSAL_TEXT)).to.be.reverted
             // ok
             await qusdt.approve(core, fee)
-            await expect(core.eventPropose("owners event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            await expect(core.eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
         })
 
         it("Accept", async () => {
             // Depends on propose !!!!!
-            await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
-            await core.eventPropose("2nd event", "desc\r\ndesc",["1: one", "2: two"])
+            await core.eventPropose(PROPOSAL_TEXT)
+            await core.eventPropose(PROPOSAL_TEXT)
             //proposers shouldnt be able
             await expect(core.connect(proposer).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")).to.be.reverted
             //admins ok
@@ -136,8 +143,8 @@ describe('BettingSystem', () => {
         })
 
         it("Reject", async () => {
-            await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
-            await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
+            await core.eventPropose(PROPOSAL_TEXT)
+            await core.eventPropose(PROPOSAL_TEXT)
             await expect(core.connect(holder).eventReject(0, "Such a shame")).to.be.reverted
             await expect(core.connect(admin).eventReject(0, "Such a shame")).to.not.be.reverted
             await expect(core.eventReject(0, "Such a shame")).to.not.be.reverted

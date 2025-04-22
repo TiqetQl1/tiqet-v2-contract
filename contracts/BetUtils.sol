@@ -7,14 +7,23 @@ library BetUtils {
     uint256 constant DECIMALS = 1_000;
 
     enum EventState {
-        Pending,
         Opened,
         Paused,
         Resolved,
-        Rejected,
         Disqualified
     }
+    enum PoposalState {
+        Pending ,
+        Rejected,
+        Accepted
+    }
+    
 
+    struct Proposal{
+        uint256 id;
+        string meta;
+        PoposalState state;
+    }
     struct Event{
         uint256 id;
         uint256 options_count;
@@ -28,11 +37,6 @@ library BetUtils {
         uint256 end_time;
         address creator;
         EventState state;
-        string title;
-    }
-    struct Option{
-        uint256 id;
-        string text;
     }
     struct Wager{
         uint256 eventId;
@@ -42,13 +46,20 @@ library BetUtils {
         bool is_paid;
     }
 
-    event EventNew(
+    event FeeChanged(
+        uint256 from,
+        uint256 to
+    );
+
+    event EventProposed(
         uint256 indexed id,
         address indexed creator,
-        string title,
-        string  question,
-        Option[] options,
-        uint256 end_time
+        string proposal_text
+    );
+    event EventAccepted(
+        uint256 indexed proposal_id,
+        uint256 indexed id,
+        string metas
     );
     event EventChanged(
         uint256 indexed id,
