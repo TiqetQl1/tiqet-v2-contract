@@ -47,11 +47,11 @@ describe('BettingSystem', () => {
         const _core  = await Core.deploy(await _token.getAddress(), await _qusdt.getAddress())
         // Build some state
         // owner = acc 0
-        await core.authAdminAdd(_accounts[1])
-        await core.authProposerAdd(_accounts[2])
-        await nft.safeMint(_accounts[3],0)
+        await _core.authAdminAdd(_accounts[1])
+        await _core.authProposerAdd(_accounts[2])
+        await _nft.safeMint(_accounts[3],0)
         // add fee
-        core.configProposalFee(fee)
+        _core.configProposalFee(fee)
         // Return
         return {_token, _qusdt, _nft, _core, _accounts}
     }
