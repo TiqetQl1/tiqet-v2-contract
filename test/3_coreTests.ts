@@ -115,8 +115,11 @@ describe('BettingSystem', () => {
         })
 
         it("Reject", async () => {
-            assert(false)
-            // TODO
+            await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
+            await core.eventPropose("1st event", "desc\r\ndesc",["1: one", "2: two"])
+            await expect(core.connect(holder).eventReject(0, "Such a shame")).to.be.reverted
+            await expect(core.connect(admin).eventReject(0, "Such a shame")).to.not.be.reverted
+            await expect(core.eventReject(0, "Such a shame")).to.not.be.reverted
         })
 
         it("Toggle pause", async () => {
@@ -137,6 +140,7 @@ describe('BettingSystem', () => {
     
     describe('Normal users :', () => {
         it("Place wager", async () => {
+            //Cand when paused 
             assert(false)
             // TODO
         })
