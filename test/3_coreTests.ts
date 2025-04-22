@@ -44,8 +44,32 @@ describe('BettingSystem', () => {
     
     describe('Events (Privileged users) :', () => {
         it("Propose", async () => {
-            assert(false)
-            // TODO
+            // Every non user should be able to propose with enough qusdt
+            const [admin, proposer, holder, ..._] = accounts
+            const fee = await core._proposal_fee()
+            // admin
+            await qusdt.mint(admin, fee)
+            await qusdt.connect(admin).approve(core, fee)
+            await core.authAdminAdd(admin)
+            await expect(core.connect(admin).eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            // proposer
+            await qusdt.mint(proposer, fee)
+            await qusdt.connect(proposer).approve(core, fee)
+            await core.authProposerAdd(proposer)
+            await expect(core.connect(proposer).eventPropose("proposers's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            // holder
+            await qusdt.mint(holder, fee)
+            await qusdt.connect(holder).approve(core, fee)
+            await nft.safeMint(holder,0)
+            await expect(core.connect(holder).eventPropose("holders's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
+            // owner
+            await qusdt.mint(owner, fee)
+            // not enough fund
+            await qusdt.approve(core, fee-1n)
+            await expect(core.eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.be.reverted
+            // ok
+            await qusdt.approve(core, fee)
+            await expect(core.eventPropose("admin's event", "desc\r\ndesc",["1: one", "2: two"])).to.not.be.reverted
         })
 
         it("Accept", async () => {
