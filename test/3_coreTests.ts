@@ -38,7 +38,7 @@ describe('BettingSystem', () => {
     let proposer : HardhatEthersSigner;
     let holder : HardhatEthersSigner;
     let users : HardhatEthersSigner[];
-    const fee = 100
+    const FEE = 100
 
     const deployFixture = async () => {
         // Accounts
@@ -57,8 +57,8 @@ describe('BettingSystem', () => {
         await _core.authAdminAdd(_accounts[1])
         await _core.authProposerAdd(_accounts[2])
         await _nft.safeMint(_accounts[3],0)
-        // add fee
-        _core.configProposalFee(fee)
+        // add FEE
+        _core.configProposalFee(FEE)
         // Return
         return {_token, _qusdt, _nft, _core, _accounts}
     }
@@ -75,7 +75,7 @@ describe('BettingSystem', () => {
     });
 
     const propose = async (by : HardhatEthersSigner = owner ) => {
-        await qusdt.mint(by, fee)
+        await qusdt.mint(by, FEE)
         await expect(core.connect(by).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
     }
 
@@ -89,7 +89,7 @@ describe('BettingSystem', () => {
         await core.connect(wallet).wagerPlace(event_id, option, amount)
     }
     
-    it("Read and write fee amount", async ()=>{
+    it("Read and write FEE amount", async ()=>{
         await expect(core.configProposalFee(100)).to.not.be.reverted
         expect(await core._proposal_fee()).to.equal(100)
     })
@@ -98,29 +98,30 @@ describe('BettingSystem', () => {
         it("Propose", async () => {
             // Every non user should be able to propose with enough qusdt
             // user
-            await qusdt.mint(accounts[5], fee)
-            await qusdt.connect(accounts[5]).approve(core, fee)
+            await qusdt.mint(accounts[5], FEE)
+            await qusdt.connect(accounts[5]).approve(core, FEE)
             await expect(core.connect(accounts[5]).eventPropose(PROPOSAL_TEXT)).to.be.reverted
             // admin
-            await qusdt.mint(admin, fee)
-            await qusdt.connect(admin).approve(core, fee)
+            await qusdt.mint(admin, FEE)
+            await qusdt.connect(admin).approve(core, FEE)
             await expect(core.connect(admin).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
             // proposer
-            await qusdt.mint(proposer, fee)
-            await qusdt.connect(proposer).approve(core, fee)
+            await qusdt.mint(proposer, FEE)
+            await qusdt.connect(proposer).approve(core, FEE)
             await expect(core.connect(proposer).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
             // holder
-            await qusdt.mint(holder, fee)
-            await qusdt.connect(holder).approve(core, fee)
+            await qusdt.mint(holder, FEE)
+            await qusdt.connect(holder).approve(core, FEE)
             await expect(core.connect(holder).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
             // owner
-            await qusdt.mint(owner, fee)
+            await qusdt.mint(owner, FEE)
             // not enough fund
-            await qusdt.approve(core, fee-1)
+            await qusdt.approve(core, FEE-1)
             await expect(core.eventPropose(PROPOSAL_TEXT)).to.be.reverted
             // ok
-            await qusdt.approve(core, fee)
-            await expect(core.eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
+            await qusdt.approve(core, FEE)
+            await expect(core.eventPropose(PROPOSAL_TEXT))
+                .to.changeTokenBalances(qusdt, [core, owner], [FEE, -FEE])
         })
 
         it("Accept", async () => {
@@ -132,7 +133,7 @@ describe('BettingSystem', () => {
             //admins ok
             await expect(core.connect(admin).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
             const bet = await core._events(0)
-            await expect(bet.fee_paid).to.be.equal(fee)
+            await expect(bet.fee_paid).to.be.equal(FEE)
             await expect(bet.vig).to.be.equal(VIG)
             await expect(bet.end_time).to.be.equal(END_TIME)
             await expect(bet.max_per_one_bet).to.be.equal(MAX_PER_BET)
