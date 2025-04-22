@@ -5,11 +5,13 @@ import { Core, TestERC721Token, TestERC20Token } from "../typechain-types";
 import { ContractTransactionResponse } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
+type Cntrct<T> = T & { deploymentTransaction(): ContractTransactionResponse }
+
 describe('BettingSystem', () => {
-    let qusdt    : TestERC20Token   & { deploymentTransaction(): ContractTransactionResponse };
-    let token    : TestERC20Token   & { deploymentTransaction(): ContractTransactionResponse };
-    let nft      : TestERC721Token  & { deploymentTransaction(): ContractTransactionResponse };
-    let core     : Core & { deploymentTransaction(): ContractTransactionResponse };
+    let qusdt    : Cntrct<TestERC20Token>
+    let token    : Cntrct<TestERC20Token>
+    let nft      : Cntrct<TestERC721Token>
+    let core     : Cntrct<Core>
     let accounts : HardhatEthersSigner[];
     let owner    : HardhatEthersSigner;
 
