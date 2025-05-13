@@ -22,7 +22,6 @@ library BetUtils {
     struct Proposal{
         uint256 proposal_id;
         address creator;
-        string meta_text;
         uint256 fee_paid;
         ProposalState state;
     }
@@ -58,12 +57,13 @@ library BetUtils {
     event EventProposed(
         uint256 indexed proposal_id,
         address indexed creator,
-        string text,
+        string metas,
         uint256 fee_paid
     );
     event EventReviewed(
         uint256 indexed proposal_id,
         uint256 indexed id,
+        bool indexed accepted,
         string metas
     );
     event EventChanged(
@@ -118,12 +118,25 @@ library BetUtils {
         Event storage bet,
         EventState state,
         string calldata description
-    ) internal {}
+    ) internal {
+        bet.state = state;
+        emit EventChanged(bet.id, state, toString(state), description);
+    }
     function make_wager(
         Event storage bet,
         address wallet, 
         uint256 outcome, 
         uint256 stake
     ) internal {}
+
+    function toString(
+        EventState state
+    ) internal pure returns (string memory) {
+        if (state == EventState.Opened) return "Opened";
+        if (state == EventState.Paused) return "Paused";
+        if (state == EventState.Resolved) return "Resolved";
+        if (state == EventState.Disqualified) return "Disqualified";
+        return "undefined";
+    }
 
 }

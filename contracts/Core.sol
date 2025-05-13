@@ -35,21 +35,20 @@ contract Core is AccessControl, Treasury{
     }
 
     function eventPropose(
-        string calldata description
+        string calldata metas
     ) external eqgt_proposer {
         treasury_qusdt_collect(msg.sender, _proposal_fee);
         uint256 index = _proposals.length;
         _proposals.push(BetUtils.Proposal(
             index,
             msg.sender,
-            description,
             _proposal_fee,
             BetUtils.ProposalState.Pending
         ));
         emit BetUtils.EventProposed(
             index,
             msg.sender,
-            description,
+            metas,
             _proposal_fee
         );
     }
@@ -67,25 +66,45 @@ contract Core is AccessControl, Treasury{
         BetUtils.Event storage bet = _events.push();
         bet.build(index, max_per_one_bet, options_count, fake_liq_per_option, vig);
         _events_metas.push(BetUtils.Metas(index, metas));
-        emit BetUtils.EventReviewed(proposal_id, index, metas);
+        emit BetUtils.EventReviewed(proposal_id, index, true, metas);
+    }
+    function eventReject(
+        uint256 proposal_id,
+        string calldata metas
+    ) external eqgt_admin {
+        require(_proposals[proposal_id].state==BetUtils.ProposalState.Pending, "208");
+        _proposals[proposal_id].state = BetUtils.ProposalState.Rejected;
+        emit BetUtils.EventReviewed(proposal_id, 0, false, metas);
     }
     function eventTogglePause(
         uint256 event_id,
         string calldata description
-    ) external {}
-    function eventReject(
-        uint256 event_id,
-        string calldata description
-    ) external {}
+    ) external eqgt_admin {
+        BetUtils.Event storage bet = _events[event_id];
+        require(uint8(bet.state)<2, "405");
+        BetUtils.EventState to_be;
+        if (bet.state == BetUtils.EventState.Opened) to_be = BetUtils.EventState.Paused;
+        if (bet.state == BetUtils.EventState.Paused) to_be = BetUtils.EventState.Opened;
+        bet.change_state(to_be, description);
+    }
     function eventDisq(
         uint256 event_id,
         string calldata description
-    ) external {}
+    ) external eqgt_admin {
+        BetUtils.Event storage bet = _events[event_id];
+        require(uint8(bet.state)<2, "405");
+        bet.change_state(BetUtils.EventState.Disqualified, description);
+    }
     function eventResolve(
         uint256 event_id,
         uint256 winner,
         string calldata description
-    ) external {}
+    ) external eqgt_admin {
+        BetUtils.Event storage bet = _events[event_id];
+        require(uint8(bet.state)<2, "405");
+        bet.winner = winner;
+        bet.change_state(BetUtils.EventState.Disqualified, description);
+    }
 
     function wagerPlace(
         uint256 event_id,

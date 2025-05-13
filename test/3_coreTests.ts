@@ -82,7 +82,7 @@ describe('BettingSystem', () => {
     }
 
     const accept = async (index: number) => {
-        await core.eventAccept(index, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")
+        await core.eventAccept(index, MAX_PER_BET, M, 2, VIG, PROPOSAL_TEXT)
     }
 
     const buy = async (wallet: HardhatEthersSigner = owner, event_id: number, option: number, amount: number) => {
@@ -149,8 +149,9 @@ describe('BettingSystem', () => {
             await propose()
             await expect(core.connect(holder).eventReject(0, "Such a shame")).to.be.reverted
             await expect(core.connect(admin).eventReject(0, "Such a shame")).to.not.be.reverted
-            await expect(core.eventReject(0, "Such a shame")).to.not.be.reverted
-            //TODO possible only in Pernding state
+            await expect(core.eventReject(1, "Such a shame")).to.not.be.reverted
+            // possible only in Pernding state
+            await expect(core.eventReject(1, "Such a shame")).to.be.reverted
         })
 
         it("Toggle pause", async () => {
@@ -158,7 +159,6 @@ describe('BettingSystem', () => {
             await accept(0)
             await expect(core.connect(holder).eventTogglePause(0, "Temporory")).to.be.reverted
             await expect(core.connect(admin).eventTogglePause(0, "Temporory")).to.not.be.reverted
-            //TODO possible only in running state
         })
 
         it("Resolve", async () => {
