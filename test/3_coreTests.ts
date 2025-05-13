@@ -56,9 +56,10 @@ describe('BettingSystem', () => {
         // owner = acc 0
         await _core.authAdminAdd(_accounts[1])
         await _core.authProposerAdd(_accounts[2])
+        await _core.authNftAdd(_nft)
         await _nft.safeMint(_accounts[3],0)
         // add FEE
-        _core.configProposalFee(FEE)
+        await _core.configProposalFee(FEE)
         // Return
         return {_token, _qusdt, _nft, _core, _accounts}
     }
@@ -76,6 +77,7 @@ describe('BettingSystem', () => {
 
     const propose = async (by : HardhatEthersSigner = owner ) => {
         await qusdt.mint(by, FEE)
+        await qusdt.approve(core, FEE)
         await expect(core.connect(by).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
     }
 
@@ -126,25 +128,25 @@ describe('BettingSystem', () => {
 
         it("Accept", async () => {
             // Depends on propose !!!!!
-            await core.eventPropose(PROPOSAL_TEXT)
-            await core.eventPropose(PROPOSAL_TEXT)
+            await propose()
+            await propose()
             //proposers shouldnt be able
-            await expect(core.connect(proposer).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Sad betting")).to.be.reverted
+            await expect(core.connect(proposer).eventAccept(0, 1_000_000,1_000,2,10,PROPOSAL_TEXT)).to.be.reverted
             //admins ok
-            await expect(core.connect(admin).eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
+            await expect(core.connect(admin).eventAccept(0, MAX_PER_BET, M, 2, VIG, PROPOSAL_TEXT)).to.not.be.reverted
             const bet = await core._events(0)
             await expect(bet.vig).to.be.equal(VIG)
-            await expect(bet.end_time).to.be.equal(END_TIME)
             await expect(bet.max_per_one_bet).to.be.equal(MAX_PER_BET)
             await expect(bet.k).to.be.equal(M**2)
             //owner ok
-            await expect(core.eventAccept(0, MAX_PER_BET, M, VIG, END_TIME, "Happy betting")).to.not.be.reverted
-            //TODO possible only in Pending state
+            await expect(core.eventAccept(1, 1_000_000,1_000,2,10,PROPOSAL_TEXT)).to.not.be.reverted
+            // possible only in Pending state
+            await expect(core.eventAccept(0, 1_000_000,1_000,2,10,PROPOSAL_TEXT)).to.be.reverted
         })
 
         it("Reject", async () => {
-            await core.eventPropose(PROPOSAL_TEXT)
-            await core.eventPropose(PROPOSAL_TEXT)
+            await propose()
+            await propose()
             await expect(core.connect(holder).eventReject(0, "Such a shame")).to.be.reverted
             await expect(core.connect(admin).eventReject(0, "Such a shame")).to.not.be.reverted
             await expect(core.eventReject(0, "Such a shame")).to.not.be.reverted

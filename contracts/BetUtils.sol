@@ -12,7 +12,7 @@ library BetUtils {
         Resolved,
         Disqualified
     }
-    enum PoposalState {
+    enum ProposalState {
         Pending ,
         Rejected,
         Accepted
@@ -24,9 +24,10 @@ library BetUtils {
         address creator;
         string meta_text;
         uint256 fee_paid;
-        PoposalState state;
+        ProposalState state;
     }
     struct Event{
+        uint256 proposal_id;
         uint256 id;
         uint256 options_count;
         uint256 max_per_one_bet;
@@ -35,8 +36,11 @@ library BetUtils {
         uint256 handle;
         uint256 winner;
         uint256 vig; // 1 means 0.01%
-        uint256 end_time;
         EventState state;
+    }
+    struct Metas{
+        uint256 id;
+        string metas;
     }
     struct Wager{
         uint256 eventId;
@@ -57,7 +61,7 @@ library BetUtils {
         string text,
         uint256 fee_paid
     );
-    event EventAccepted(
+    event EventReviewed(
         uint256 indexed proposal_id,
         uint256 indexed id,
         string metas
@@ -91,10 +95,25 @@ library BetUtils {
 
     function build(
         Event storage bet,
-        string calldata title,
-        string calldata description,
-        string[] calldata outcomes
-    ) internal {}
+        uint256 id,
+        uint256 max_per_one_bet,
+        uint256 options_count,
+        uint256 fake_liq_per_option,
+        uint256 vig
+    ) internal {
+        bet.id = id;
+        bet.options_count = options_count;
+        bet.max_per_one_bet = max_per_one_bet;
+        bet.k=1;
+        for (uint256 i = 0; i < options_count; i++) {
+            bet.m.push();
+            bet.m[i] = fake_liq_per_option;
+            bet.k = bet.k * fake_liq_per_option;
+        }
+        bet.handle=0;
+        bet.vig = vig;
+        bet.state = EventState.Paused;
+    }
     function change_state(
         Event storage bet,
         EventState state,

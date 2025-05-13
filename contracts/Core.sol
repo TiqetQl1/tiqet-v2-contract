@@ -11,12 +11,12 @@ contract Core is AccessControl, Treasury{
     constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
     /// @notice will hold all proposals, accepted or not
-    BetUtils.Proposal[] proposals;
+    BetUtils.Proposal[] _proposals;
 
     /// @notice holds states and data thats needed contract side
-    BetUtils.Event[] public _events;
+    BetUtils.Event[] public  _events;
     /// @notice Holds title, desciptions, options and other frontend infos
-    string  public          _events_metas;
+    BetUtils.Metas[]  public _events_metas;
     /// @notice array of wagers made by a wallet on an event
     mapping(uint256=>mapping(address => BetUtils.Wager[])) public _wagers;
 
@@ -38,13 +38,13 @@ contract Core is AccessControl, Treasury{
         string calldata description
     ) external eqgt_proposer {
         treasury_qusdt_collect(msg.sender, _proposal_fee);
-        uint256 index = proposals.length;
-        proposals.push(BetUtils.Proposal(
+        uint256 index = _proposals.length;
+        _proposals.push(BetUtils.Proposal(
             index,
             msg.sender,
             description,
             _proposal_fee,
-            BetUtils.PoposalState.Pending
+            BetUtils.ProposalState.Pending
         ));
         emit BetUtils.EventProposed(
             index,
@@ -54,13 +54,21 @@ contract Core is AccessControl, Treasury{
         );
     }
     function eventAccept(
-        uint256 event_id,
+        uint256 proposal_id,
         uint256 max_per_one_bet,
         uint256 fake_liq_per_option,
+        uint256 options_count,
         uint256 vig,
-        uint256 end_time,
         string calldata metas
-    ) external {}
+    ) external eqgt_admin {
+        require(_proposals[proposal_id].state==BetUtils.ProposalState.Pending, "208");
+        _proposals[proposal_id].state = BetUtils.ProposalState.Accepted;
+        uint256 index = _events.length;
+        BetUtils.Event storage bet = _events.push();
+        bet.build(index, max_per_one_bet, options_count, fake_liq_per_option, vig);
+        _events_metas.push(BetUtils.Metas(index, metas));
+        emit BetUtils.EventReviewed(proposal_id, index, metas);
+    }
     function eventTogglePause(
         uint256 event_id,
         string calldata description
