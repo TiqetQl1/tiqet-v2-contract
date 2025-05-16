@@ -4,7 +4,10 @@ pragma solidity ^0.8.20;
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 
 library BetUtils {
-    uint256 constant DECIMALS = 1_000;
+    using ABDKMath64x64 for int128;
+    using ABDKMath64x64 for uint256;
+
+    uint256 public constant DECIMALS = 100_000_000;
 
     enum EventState {
         Opened,
@@ -30,8 +33,8 @@ library BetUtils {
         uint256 id;
         uint256 options_count;
         uint256 max_per_one_bet;
-        uint256[] m;
-        uint256 k;
+        int128 [] m;
+        int128  k;
         uint256 handle;
         uint256 winner;
         uint256 vig; // 1 means 0.01%
@@ -44,7 +47,7 @@ library BetUtils {
     struct Wager{
         uint256 eventId;
         uint256 option;
-        uint256 amount;
+        uint256 stake;
         uint256 prize;
         bool is_paid;
     }
@@ -77,7 +80,7 @@ library BetUtils {
         address indexed wallet,
         uint256 indexed event_id,
         uint256 option,
-        uint256 amount,
+        uint256 stake,
         uint256 prize
     );
     event WagerClaimed(
@@ -90,9 +93,10 @@ library BetUtils {
         uint256 indexed wager_id,
         uint256 indexed event_id,
         address indexed wallet,
-        uint256 amount
+        uint256 stake
     );
 
+    // Bets
     function build(
         Event storage bet,
         uint256 id,
@@ -101,15 +105,15 @@ library BetUtils {
         uint256 fake_liq_per_option,
         uint256 vig
     ) internal {
+        int128 init_value = fake_liq_per_option.fromUInt();
         bet.id = id;
         bet.options_count = options_count;
         bet.max_per_one_bet = max_per_one_bet;
         bet.k=1;
         for (uint256 i = 0; i < options_count; i++) {
-            bet.m.push();
-            bet.m[i] = fake_liq_per_option;
-            bet.k = bet.k * fake_liq_per_option;
+            bet.m.push(init_value);
         }
+        bet.k = init_value.pow(options_count);
         bet.handle=0;
         bet.vig = vig;
         bet.state = EventState.Paused;
@@ -120,16 +124,80 @@ library BetUtils {
         string calldata description
     ) internal {
         bet.state = state;
-        emit EventChanged(bet.id, state, toString(state), description);
+        emit EventChanged(bet.id, state, to_string(state), description);
     }
+
+    // Wagers
     function make_wager(
         Event storage bet,
         address wallet, 
         uint256 outcome, 
         uint256 stake
     ) internal {}
+    function get_chance_int(
+        Event storage bet,
+        uint256 option
+    ) internal view returns (int128) {
+        int128 total = sum_array(bet.m);
+        return bet.m[option].div(total);
+    }
+    function get_chance_uint(
+        Event storage bet,
+        uint256 option
+    ) internal view returns (uint256) {
+        int128 chance = get_chance_int(bet, option);
+        return chance.mul(ABDKMath64x64.fromUInt(DECIMALS)).toUInt();
+    }
+    function get_odd(
+        Event storage bet,
+        uint256 option
+    ) internal view returns(uint256) {
+        int128 chance = get_chance_int(bet, option);
+        int128 percent = chance.mul(ABDKMath64x64.fromUInt(100)); 
 
-    function toString(
+        int128 exponent = map(
+            ABDKMath64x64.fromUInt(0),
+            ABDKMath64x64.fromUInt(100),
+            percent,
+            ABDKMath64x64.divu(9000, 10000), // 0.9000
+            ABDKMath64x64.divu(9999, 10000)  // 0.9999
+        );
+
+        int128 odd = safe_pow(ABDKMath64x64.fromUInt(1).div(chance), exponent);
+        return odd.mul(ABDKMath64x64.fromUInt(DECIMALS)).toUInt();
+    }
+    function sum_array(
+        int128[] storage arr
+    ) internal view returns (int128 sum) {
+        for (uint256 i = 0; i < arr.length; i++) {
+            sum = sum.add(arr[i]);
+        }
+    }
+
+    // Helpers
+    function safe_pow(
+        int128 base, 
+        int128 exp
+    ) internal pure returns (int128) {
+        require(base > 0, "Pow base must be > 0");
+        int128 lnBase = base.ln();
+        int128 scaled = lnBase.mul(exp);
+        return scaled.exp(); // base^exp
+    }
+    function map(
+        int128 inMin,
+        int128 inMax,
+        int128 value,
+        int128 outMin,
+        int128 outMax
+    ) internal pure returns (int128) {
+        int128 inRange = inMax.sub(inMin);
+        require(inRange > 0, "Invalid in range");
+        int128 outRange = outMax.sub(outMin);
+        int128 norm = value.sub(inMin).div(inRange);
+        return norm.mul(outRange).add(outMin);
+    }
+    function to_string(
         EventState state
     ) internal pure returns (string memory) {
         if (state == EventState.Opened) return "Opened";

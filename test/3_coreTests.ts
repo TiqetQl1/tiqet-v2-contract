@@ -137,7 +137,6 @@ describe('BettingSystem', () => {
             const bet = await core._events(0)
             await expect(bet.vig).to.be.equal(VIG)
             await expect(bet.max_per_one_bet).to.be.equal(MAX_PER_BET)
-            await expect(bet.k).to.be.equal(M**2)
             //owner ok
             await expect(core.eventAccept(1, 1_000_000,1_000,2,10,PROPOSAL_TEXT)).to.not.be.reverted
             // possible only in Pending state
@@ -188,11 +187,11 @@ describe('BettingSystem', () => {
     
     describe('Normal users :', () => {
         it("Place wager", async () => {
-            propose()
-            accept(0)
+            await propose()
+            await accept(0)
             const user = accounts[4];
-            token.mint(user, MAX_PER_BET*10)
-            token.connect(user).approve(core, MAX_PER_BET*10)
+            await token.mint(user, MAX_PER_BET*10)
+            await token.connect(user).approve(core, MAX_PER_BET*10)
             //over the limit per bet
             await expect(core.connect(user).wagerPlace(0, 1, MAX_PER_BET+1)).to.be.reverted
             //zero amount error
@@ -213,12 +212,12 @@ describe('BettingSystem', () => {
         })
 
         it("Claim on win", async () => {
-            propose()
-            accept(0)
-            buy(users[0],0,1, MAX_PER_BET/1)
-            buy(users[0],0,0, MAX_PER_BET/2)
-            buy(users[1],0,0, MAX_PER_BET/3)
-            buy(users[2],0,1, MAX_PER_BET/4)
+            await propose()
+            await accept(0)
+            await buy(users[0],0,1, MAX_PER_BET/1)
+            await buy(users[0],0,0, MAX_PER_BET/2)
+            await buy(users[1],0,0, MAX_PER_BET/3)
+            await buy(users[2],0,1, MAX_PER_BET/4)
             const bef = users.slice(0, 2).map((user)=> token.balanceOf(user))
             const before = await Promise.all(bef)
             // not ended
@@ -233,14 +232,14 @@ describe('BettingSystem', () => {
         })
         
         it("Refund on DisQ", async () => {
-            propose()
-            accept(0)
-            buy(users[0], 0,0 ,MAX_PER_BET)
-            buy(users[0], 0,0 ,MAX_PER_BET)
+            await propose()
+            await accept(0)
+            await buy(users[0], 0,0 ,MAX_PER_BET)
+            await buy(users[0], 0,0 ,MAX_PER_BET)
             await core.eventDisq(0, "Wasnt cool")
             const amount = 
-                (await core._wagers(0,users[0],0)).amount 
-                + (await core._wagers(0,users[0],1)).amount
+                (await core._wagers(0,users[0],0)).stake 
+                + (await core._wagers(0,users[0],1)).stake
             await expect(core.wagerRefund).to.changeTokenBalances(token, [core, users[0]], [-amount, amount])
         })
     })

@@ -106,6 +106,19 @@ contract Core is AccessControl, Treasury{
         bet.change_state(BetUtils.EventState.Disqualified, description);
     }
 
+    function getOdd(
+        uint256 event_id,
+        uint256 option
+    ) external view returns(uint256) {
+        return _events[event_id].get_odd(option);
+    }
+
+    function getChance(
+        uint256 event_id,
+        uint256 option
+    ) external view returns(uint256) {
+        return _events[event_id].get_chance_uint(option);
+    }
     function wagerPlace(
         uint256 event_id,
         uint256 option, 
