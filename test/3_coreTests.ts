@@ -22,7 +22,7 @@ const PROPOSAL = {
     ]
 }
 const PROPOSAL_TEXT = JSON.stringify(PROPOSAL)
-const M = 1000;
+const M = 500;
 const MAX_PER_BET = 20;
 const VIG = 100;
 const END_TIME = 325546864;
@@ -81,8 +81,13 @@ describe('BettingSystem', () => {
         await expect(core.connect(by).eventPropose(PROPOSAL_TEXT)).to.not.be.reverted
     }
 
+    const togglePause = async (index: number) => {
+        await core.eventTogglePause(index, " ");
+    }
+
     const accept = async (index: number) => {
         await core.eventAccept(index, MAX_PER_BET, M, 2, VIG, PROPOSAL_TEXT)
+        await togglePause(index)
     }
 
     const buy = async (wallet: HardhatEthersSigner = owner, event_id: number, option: number, amount: number) => {
@@ -251,8 +256,21 @@ describe('BettingSystem', () => {
         })
         
         it("Access wager meta", async () => {
-            assert(false)
+            // assert(false)
             // TODO
+        })
+    })
+
+    describe("dev test", ()=>{
+        it("test", async ()=>{
+            // max per bet
+            const getStatus = async (e:number =0, o:number=0) => {console.log(e, o,"chance ",(Number(await core.getChance(0,1))/100).toFixed(2)," odd ", (Number(await core.getOdd(0,1))/10000).toFixed(4), await core.debug(0))}
+            await propose()
+            await accept(0)
+            await getStatus()
+            console.log()
+            await buy(users[4], 0, 1, 100)
+            await getStatus()
         })
     })
 })

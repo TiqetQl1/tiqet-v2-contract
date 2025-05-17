@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
+
 import "./AccessControl.sol";
 import "./Treasury.sol";
 import "./BetUtils.sol";
 
 contract Core is AccessControl, Treasury{
     using BetUtils for BetUtils.Event;
+    using ABDKMath64x64 for int128;
+    using ABDKMath64x64 for uint256;
 
     constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
@@ -18,6 +22,7 @@ contract Core is AccessControl, Treasury{
     /// @notice Holds title, desciptions, options and other frontend infos
     BetUtils.Metas[]  public _events_metas;
     /// @notice array of wagers made by a wallet on an event
+    /// @dev Wager[] res = _wagers[${event_id}][${wallet}]
     mapping(uint256=>mapping(address => BetUtils.Wager[])) public _wagers;
 
     /// @notice fee needed to make new proposal
@@ -80,6 +85,7 @@ contract Core is AccessControl, Treasury{
         uint256 event_id,
         string calldata description
     ) external eqgt_admin {
+        require(event_id<_events.length, "404");
         BetUtils.Event storage bet = _events[event_id];
         require(uint8(bet.state)<2, "405");
         BetUtils.EventState to_be;
@@ -91,6 +97,7 @@ contract Core is AccessControl, Treasury{
         uint256 event_id,
         string calldata description
     ) external eqgt_admin {
+        require(event_id<_events.length, "404");
         BetUtils.Event storage bet = _events[event_id];
         require(uint8(bet.state)<2, "405");
         bet.change_state(BetUtils.EventState.Disqualified, description);
@@ -100,6 +107,7 @@ contract Core is AccessControl, Treasury{
         uint256 winner,
         string calldata description
     ) external eqgt_admin {
+        require(event_id<_events.length, "404");
         BetUtils.Event storage bet = _events[event_id];
         require(uint8(bet.state)<2, "405");
         bet.winner = winner;
@@ -110,26 +118,78 @@ contract Core is AccessControl, Treasury{
         uint256 event_id,
         uint256 option
     ) external view returns(uint256) {
-        return _events[event_id].get_odd(option);
+        return _events[event_id]
+            .get_odd(option)
+            .mul(ABDKMath64x64.fromUInt(BetUtils.DECIMALS))
+            .toUInt();
     }
-
     function getChance(
         uint256 event_id,
         uint256 option
     ) external view returns(uint256) {
-        return _events[event_id].get_chance_uint(option);
+        return _events[event_id]
+            .get_chance(option)
+            .mul(ABDKMath64x64.fromUInt(BetUtils.DECIMALS))
+            .toUInt();
     }
+
+    struct Debug{
+        uint id;
+        uint[] m;
+        uint k;
+    }
+    function debug(
+        uint256 event_id
+    ) external view returns(Debug memory str) {
+        BetUtils.Event storage bet = _events[event_id];
+        str.id = event_id;
+        str.m = new uint[](bet.options_count);
+        for (uint256 i = 0; i < bet.m.length; i++) {
+            str.m[i] = (bet.m[i].mul(BetUtils.DECIMALS.fromUInt()).toUInt());
+        }
+        str.k = bet.k.toUInt();
+    }
+
     function wagerPlace(
         uint256 event_id,
         uint256 option, 
-        uint256 amount
-    ) external {}
+        uint256 stake
+    ) external {
+        require(event_id<_events.length, "404");
+        BetUtils.Event storage bet = _events[event_id];
+        address wallet = msg.sender;
+        BetUtils.Wager storage raw_wager = _wagers[event_id][wallet].push();
+        bet.make_wager(raw_wager, option, stake);
+    }
     function wagerClaim(
-        uint256 event_id
-    ) external {}
-    function wagerRefund(
+        uint256 event_id,
         uint256 wager_id
-    ) external {}
+    ) external {
+        address wallet = msg.sender;
+        require(event_id<_events.length, "404");
+        BetUtils.Event storage bet = _events[event_id];
+        require(uint8(bet.state)>1, "425");
+        require(bet.state==BetUtils.EventState.Resolved, "405");
+        require(_wagers[event_id][wallet].length>wager_id, "400");
+        BetUtils.Wager storage wager = _wagers[event_id][wallet][wager_id];
+        require(wager.option==bet.winner, "417");
+        treasury_token_give(wallet, wager.prize);
+        wager.is_paid = true;
+    }
+    function wagerRefund(
+        uint256 event_id,
+        uint256 wager_id
+    ) external {
+        address wallet = msg.sender;
+        require(event_id<_events.length, "404");
+        BetUtils.Event storage bet = _events[event_id];
+        require(uint8(bet.state)>1, "425");
+        require(bet.state==BetUtils.EventState.Disqualified, "405");
+        require(_wagers[event_id][wallet].length>wager_id, "400");
+        BetUtils.Wager storage wager = _wagers[event_id][wallet][wager_id];
+        treasury_token_give(wallet, wager.stake);
+        wager.is_paid = true;
+    }
 
     function clientPagination(
         uint256 per_page,

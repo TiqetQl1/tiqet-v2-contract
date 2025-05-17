@@ -7,7 +7,7 @@ library BetUtils {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
-    uint256 public constant DECIMALS = 100_000_000;
+    uint256 public constant DECIMALS = 10_000;
 
     enum EventState {
         Opened,
@@ -109,7 +109,6 @@ library BetUtils {
         bet.id = id;
         bet.options_count = options_count;
         bet.max_per_one_bet = max_per_one_bet;
-        bet.k=1;
         for (uint256 i = 0; i < options_count; i++) {
             bet.m.push(init_value);
         }
@@ -130,29 +129,53 @@ library BetUtils {
     // Wagers
     function make_wager(
         Event storage bet,
-        address wallet, 
-        uint256 outcome, 
+        Wager storage wager,
+        uint256 option, 
         uint256 stake
-    ) internal {}
-    function get_chance_int(
+    ) internal {
+        require(bet.state==BetUtils.EventState.Opened, "423");
+        require(option<bet.options_count , "400");
+        require(stake<bet.max_per_one_bet, "403");
+        // update weights ...
+        int128 fixed_stake = stake.fromUInt();
+        bet.m[option] = bet.m[option].add(fixed_stake);
+        int128 current_product=(uint256 (1)).fromUInt();
+        for (uint256 i = 0; i < bet.options_count; i++) {
+            if(i == option) continue;
+            current_product = current_product.mul(bet.m[i]);
+        }
+        int128 target_product = bet.k.div(bet.m[option]);
+        
+        int128 logC = current_product.ln();
+        int128 logT = target_product.ln();
+        int128 logg = logT.div(logC);
+
+        for (uint256 i = 0; i < bet.options_count; i++) {
+            if (i == option) continue;
+            bet.m[i] = safe_pow(bet.m[i], logg);
+        }
+        // calc prize ...
+        uint256 prize = (fixed_stake.mul(get_odd(bet, option))).toUInt();
+        // fill wager instance ...
+        bet.handle    = bet.handle + stake;
+        wager.eventId = bet.id;
+        wager.is_paid = false;
+        wager.option  = option;
+        wager.stake   = stake;
+        wager.prize   = prize;
+    }
+    function get_chance(
         Event storage bet,
         uint256 option
     ) internal view returns (int128) {
         int128 total = sum_array(bet.m);
         return bet.m[option].div(total);
     }
-    function get_chance_uint(
-        Event storage bet,
-        uint256 option
-    ) internal view returns (uint256) {
-        int128 chance = get_chance_int(bet, option);
-        return chance.mul(ABDKMath64x64.fromUInt(DECIMALS)).toUInt();
-    }
     function get_odd(
         Event storage bet,
         uint256 option
-    ) internal view returns(uint256) {
-        int128 chance = get_chance_int(bet, option);
+    ) internal view returns(int128) {
+        int128 chance = get_chance(bet, option);
         int128 percent = chance.mul(ABDKMath64x64.fromUInt(100)); 
 
         int128 exponent = map(
@@ -164,11 +187,12 @@ library BetUtils {
         );
 
         int128 odd = safe_pow(ABDKMath64x64.fromUInt(1).div(chance), exponent);
-        return odd.mul(ABDKMath64x64.fromUInt(DECIMALS)).toUInt();
+        return odd;
     }
     function sum_array(
         int128[] storage arr
     ) internal view returns (int128 sum) {
+        sum = (uint256 (0)).fromUInt();
         for (uint256 i = 0; i < arr.length; i++) {
             sum = sum.add(arr[i]);
         }
