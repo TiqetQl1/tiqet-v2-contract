@@ -247,37 +247,27 @@ describe('BettingSystem', () => {
             await propose()
             await accept(0)
             await buy(users[0], 0,0 ,MAX_PER_BET)
-            await buy(users[0], 0,0 ,MAX_PER_BET)
+            await buy(users[0], 0,1 ,MAX_PER_BET)
             await core.eventDisq(0, "Wasnt cool")
-            const amount = 
-                (await core._wagers(0,users[0],0)).stake 
-                + (await core._wagers(0,users[0],1)).stake
-            await expect(core.wagerRefund).to.changeTokenBalances(token, [core, users[0]], [-amount, amount])
+            await expect(core.connect(users[0]).wagerRefund(0, 0)).to.changeTokenBalances(token, [core, users[0]], [-MAX_PER_BET, MAX_PER_BET])
+            await expect(core.connect(users[0]).wagerRefund(0, 1)).to.changeTokenBalances(token, [core, users[0]], [-MAX_PER_BET, MAX_PER_BET])
         })
     })
 
     describe('Client app :', () => {
         it("Access bet meta from event", async () => {
-            assert(false)
-            // TODO
+            await propose()
+            await expect(core._events_metas(0)).to.be.reverted
+            await accept(0)
+            expect((await core._events_metas(0)).metas).to.equal(PROPOSAL_TEXT)
         })
         
         it("Access wager meta", async () => {
-            // assert(false)
-            // TODO
-        })
-    })
-
-    describe.skip("dev test", ()=>{
-        it("test", async ()=>{
-            // max per bet
-            const getStatus = async (e:number =0, o:number=0) => {console.log(e, o,"chance ",(Number(await core.getChance(0,1))/100).toFixed(2)," odd ", (Number(await core.getOdd(0,1))/10000).toFixed(4), await core.debug(0))}
             await propose()
             await accept(0)
-            await getStatus()
-            console.log()
-            await buy(users[4], 0, 1, 100)
-            await getStatus()
+            await expect(core._wagers(0, users[2], 0)).to.be.reverted
+            await buy(users[2], 0, 0, MAX_PER_BET)
+            await expect(core._wagers(0, users[2], 0)).to.not.be.reverted
         })
     })
 })
