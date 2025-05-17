@@ -111,7 +111,7 @@ contract Core is AccessControl, Treasury{
         BetUtils.Event storage bet = _events[event_id];
         require(uint8(bet.state)<2, "405");
         bet.winner = winner;
-        bet.change_state(BetUtils.EventState.Disqualified, description);
+        bet.change_state(BetUtils.EventState.Resolved, description);
     }
 
     function getOdd(
@@ -158,6 +158,7 @@ contract Core is AccessControl, Treasury{
         require(event_id<_events.length, "404");
         BetUtils.Event storage bet = _events[event_id];
         address wallet = msg.sender;
+        treasury_token_collect(wallet, stake);
         BetUtils.Wager storage raw_wager = _wagers[event_id][wallet].push();
         bet.make_wager(raw_wager, option, stake);
     }
@@ -172,6 +173,7 @@ contract Core is AccessControl, Treasury{
         require(bet.state==BetUtils.EventState.Resolved, "405");
         require(_wagers[event_id][wallet].length>wager_id, "400");
         BetUtils.Wager storage wager = _wagers[event_id][wallet][wager_id];
+        require(wager.is_paid==false,"208");
         require(wager.option==bet.winner, "417");
         treasury_token_give(wallet, wager.prize);
         wager.is_paid = true;

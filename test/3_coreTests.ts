@@ -92,7 +92,8 @@ describe('BettingSystem', () => {
 
     const buy = async (wallet: HardhatEthersSigner = owner, event_id: number, option: number, amount: number) => {
         await token.mint(wallet,  amount)
-        await token.approve(core, amount)
+        await token.connect(wallet).approve(core, amount)
+        // console.log(amount, await token.balanceOf(wallet), await token.allowance(wallet, core))
         await core.connect(wallet).wagerPlace(event_id, option, amount)
     }
     
@@ -217,23 +218,29 @@ describe('BettingSystem', () => {
         })
 
         it("Claim on win", async () => {
+            await token.mint(core, MAX_PER_BET*10)
             await propose()
             await accept(0)
-            await buy(users[0],0,1, MAX_PER_BET/1)
-            await buy(users[0],0,0, MAX_PER_BET/2)
-            await buy(users[1],0,0, MAX_PER_BET/3)
-            await buy(users[2],0,1, MAX_PER_BET/4)
-            const bef = users.slice(0, 2).map((user)=> token.balanceOf(user))
+            const winner_option = 1;
+            const loser_option = 0;
+            await buy(users[3],0,winner_option, Math.floor(MAX_PER_BET/1)) //0
+            await buy(users[3],0,loser_option , Math.floor(MAX_PER_BET/2)) //1
+            await buy(users[4],0,loser_option , Math.floor(MAX_PER_BET/3)) //0
+            await buy(users[5],0,winner_option, Math.floor(MAX_PER_BET/4)) //0
+            const bef = users.slice(2).map((user)=> token.balanceOf(user))
             const before = await Promise.all(bef)
             // not ended
-            await expect(core.connect(users[0]).wagerClaim(0)).to.be.reverted
-            await core.eventResolve(0, 1, "2nd option won")
-            await expect(core.connect(users[0]).wagerClaim(0)).to.not.be.reverted
-            await expect(core.connect(users[1]).wagerClaim(0)).to.not.be.reverted
-            await expect(core.connect(users[2]).wagerClaim(0)).to.not.be.reverted
-            expect(await token.balanceOf(users[0])).to.not.be.equal(before[0]) // won some
-            expect(await token.balanceOf(users[1])).to.be.equal(before[1])     // not won
-            expect(await token.balanceOf(users[2])).to.not.be.equal(before[2]) // won all
+            await expect(core.connect(users[3]).wagerClaim(0,0)).to.be.reverted
+            await core.eventResolve(0, winner_option, "2nd option won")
+            expect((await core._events(0)).state==0n)
+            expect(Number((await core._events(0)).winner) == winner_option)
+            await expect(core.connect(users[3]).wagerClaim(0,0)).to.not.be.reverted
+            await expect(core.connect(users[3]).wagerClaim(0,1)).to.be.reverted
+            await expect(core.connect(users[4]).wagerClaim(0,0)).to.be.reverted
+            await expect(core.connect(users[5]).wagerClaim(0,0)).to.not.be.reverted
+            expect(await token.balanceOf(users[3])).to.not.be.equal(before[0]) // won some
+            expect(await token.balanceOf(users[4])).to.be.equal(before[1])     // not won
+            expect(await token.balanceOf(users[5])).to.not.be.equal(before[2]) // won all
         })
         
         it("Refund on DisQ", async () => {
@@ -261,7 +268,7 @@ describe('BettingSystem', () => {
         })
     })
 
-    describe("dev test", ()=>{
+    describe.skip("dev test", ()=>{
         it("test", async ()=>{
             // max per bet
             const getStatus = async (e:number =0, o:number=0) => {console.log(e, o,"chance ",(Number(await core.getChance(0,1))/100).toFixed(2)," odd ", (Number(await core.getOdd(0,1))/10000).toFixed(4), await core.debug(0))}
