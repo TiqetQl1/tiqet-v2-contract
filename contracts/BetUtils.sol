@@ -133,9 +133,6 @@ library BetUtils {
         uint256 option, 
         uint256 stake
     ) internal {
-        require(bet.state==BetUtils.EventState.Opened, "423");
-        require(option<bet.options_count , "400");
-        require(stake>0 && stake<=bet.max_per_one_bet, "403");
         // update weights ...
         int128 fixed_stake = stake.fromUInt();
         bet.m[option] = bet.m[option].add(fixed_stake);

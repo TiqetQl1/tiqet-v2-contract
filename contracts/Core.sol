@@ -157,6 +157,9 @@ contract Core is AccessControl, Treasury{
     ) external {
         require(event_id<_events.length, "404");
         BetUtils.Event storage bet = _events[event_id];
+        require(bet.state==BetUtils.EventState.Opened, "423");
+        require(option<bet.options_count , "400");
+        require(stake>0 && stake<=bet.max_per_one_bet, "403");
         address wallet = msg.sender;
         treasury_token_collect(wallet, stake);
         BetUtils.Wager storage raw_wager = _wagers[event_id][wallet].push();
