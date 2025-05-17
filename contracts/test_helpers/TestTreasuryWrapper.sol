@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./Treasury.sol";
+import "../Treasury.sol";
 
 /// @title TreasuryTestWrapper
 /// @notice to test the internal functions of the main contract
