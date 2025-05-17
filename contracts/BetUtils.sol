@@ -3,97 +3,153 @@ pragma solidity ^0.8.20;
 
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 
+/// @title BetUtils
+/// @author [KAYT33N](https://github.com/KAYT33N)
+/// @notice Holds the codes related to Events and betting
+/// @dev Explain to a developer any extra details
 library BetUtils {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
-
+    
+    /// @notice Used for converting float to int and in reverse
     uint256 public constant DECIMALS = 10_000;
 
+    /// @notice States that an event can be in
     enum EventState {
         Opened,
         Paused,
         Resolved,
         Disqualified
     }
+    /// @notice States of the proposals
     enum ProposalState {
         Pending ,
         Rejected,
         Accepted
     }
     
-
+    /// @notice Events will be holded in this form before processing
     struct Proposal{
-        uint256 proposal_id;
+        uint256 id; // to remain consistancy
         address creator;
-        uint256 fee_paid;
+        uint256 fee_paid; // To payback in case of changing the fee and getting rejected
         ProposalState state;
     }
+    /// @notice Final form of events after getting accepted
     struct Event{
         uint256 proposal_id;
         uint256 id;
+        address creator;
         uint256 options_count;
         uint256 max_per_one_bet;
-        int128 [] m;
-        int128  k;
-        uint256 handle;
-        uint256 winner;
-        uint256 vig; // 1 means 0.01%
+        int128 [] m; // Weight of each option, used when getting the chances, changes on each buy
+        int128  k; // The total product of all options weightes, wont change over time
+        uint256 handle; // Total money raised by this single event
+        uint256 winner; // Index of the winner option, only when state==Resolved
+        uint256 vig; // 1 means 0.01%, percent that goes to creator
         EventState state;
     }
+    /// @notice Holds metas of an event
     struct Metas{
-        uint256 id;
-        string metas;
+        uint256 id; // To preserve consistancy in front-end
+        string metas; // Holds a json string with all key values e.g images and options etc
     }
+    /// @notice Holds data related to a bet user made
     struct Wager{
-        uint256 eventId;
-        uint256 option;
-        uint256 stake;
-        uint256 prize;
-        bool is_paid;
+        uint256 event_id;
+        uint256 option; // The option they made bet on
+        uint256 stake; // The amount of money they've paid 
+        uint256 prize; // The outcome if bet wins
+        bool is_paid; // If it has been paid
     }
 
+    /// @notice Emitted on change of the fee to make a proposal
+    /// @param from Old amount
+    /// @param to New amount
     event FeeChanged(
         uint256 from,
         uint256 to
     );
-
+    /// @notice Emitted on making a new proposal
+    /// @param proposal_id -
+    /// @param creator Wallet address of the proposer
+    /// @param metas A json string to hold details of the proposal, Storing it on chain was expensive in gas
+    /// @param fee_paid -
     event EventProposed(
         uint256 indexed proposal_id,
         address indexed creator,
         string metas,
         uint256 fee_paid
     );
+    /// @notice Emitted on reviewing proposals
+    /// @param proposal_id -
+    /// @param event_id Has meaning if `accepted` is true
+    /// @param accepted If the proposal has been accepted
+    /// @param metas Json string of event details
     event EventReviewed(
         uint256 indexed proposal_id,
-        uint256 indexed id,
+        uint256 indexed event_id,
         bool indexed accepted,
         string metas
     );
+    /// @notice Emitted on chaing of the events state
+    /// @param event_id -
+    /// @param state Code of the state that event has gotten to (0-3)
+    /// @param state_text (Opened|Paused|Resolved|Disqualified)
+    /// @param description More info on the desicion by the admin
     event EventChanged(
-        uint256 indexed id,
+        uint256 indexed event_id,
         EventState state,
         string state_text,
         string description
     );
+    /// @notice e.g. user betted on an option
+    /// @param event_id -
+    /// @param wager_id -
+    /// @param wallet Wallet address of the user
+    /// @param option The oucome they've betted on
+    /// @param stake Amount of money they've betted
+    /// @param prize The money they will collect on win
     event WagerMade(
+        uint256 indexed event_id,
         uint256 indexed wager_id,
         address indexed wallet,
-        uint256 indexed event_id,
         uint256 option,
         uint256 stake,
         uint256 prize
     );
+    /// @notice Wager has been claimed on win
+    /// @param event_id -
+    /// @param wager_id -
+    /// @param wallet Wallet address of the user
+    /// @param amount Amount they've collected
     event WagerClaimed(
-        uint256 indexed wager_id,
         uint256 indexed event_id,
+        uint256 indexed wager_id,
         address indexed wallet,
-        uint256 prize
+        uint256 amount
     );
-    event WagerRefunded(
-        uint256 indexed wager_id,
+    /// @notice Details of the vig payed
+    /// @param event_id -
+    /// @param wager_id -
+    /// @param wallet Wallet address of the bet proposer
+    /// @param amount Amount they've recieved
+    event VigPayed(
         uint256 indexed event_id,
+        uint256 indexed wager_id,
         address indexed wallet,
-        uint256 stake
+        uint256 amount
+    );
+    /// @notice Wager has been refunded on disQ
+    /// @param event_id -
+    /// @param wager_id -
+    /// @param wallet Wallet address of the user
+    /// @param amount Amount they've collected
+    event WagerRefunded(
+        uint256 indexed event_id,
+        uint256 indexed wager_id,
+        address indexed wallet,
+        uint256 amount
     );
 
     // Bets
@@ -155,7 +211,7 @@ library BetUtils {
         uint256 prize = (fixed_stake.mul(get_odd(bet, option))).toUInt();
         // fill wager instance ...
         bet.handle    = bet.handle + stake;
-        wager.eventId = bet.id;
+        wager.event_id = bet.id;
         wager.is_paid = false;
         wager.option  = option;
         wager.stake   = stake;
