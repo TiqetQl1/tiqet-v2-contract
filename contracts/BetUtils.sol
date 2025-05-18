@@ -163,6 +163,8 @@ library BetUtils {
     ) internal {
         int128 init_value = fake_liq_per_option.fromUInt();
         bet.id = id;
+        bet.creator = proposal.creator;
+        bet.proposal_id = proposal.id;
         bet.options_count = options_count;
         bet.max_per_one_bet = max_per_one_bet;
         for (uint256 i = 0; i < options_count; i++) {

@@ -65,11 +65,13 @@ contract Core is AccessControl, Treasury{
         uint256 vig,
         string calldata metas
     ) external eqgt_admin {
-        require(_proposals[proposal_id].state==BetUtils.ProposalState.Pending, "208");
-        _proposals[proposal_id].state = BetUtils.ProposalState.Accepted;
+        require(_proposals.length>proposal_id, "404");
+        BetUtils.Proposal storage proposal = _proposals[proposal_id];
+        require(proposal.state==BetUtils.ProposalState.Pending, "208");
+        proposal.state = BetUtils.ProposalState.Accepted;
         uint256 index = _events.length;
         BetUtils.Event storage bet = _events.push();
-        bet.build(index, max_per_one_bet, options_count, fake_liq_per_option, vig);
+        bet.build(proposal, index, max_per_one_bet, options_count, fake_liq_per_option, vig);
         _events_metas.push(BetUtils.Metas(index, metas));
         emit BetUtils.EventReviewed(proposal_id, index, true, metas);
     }
@@ -77,9 +79,11 @@ contract Core is AccessControl, Treasury{
         uint256 proposal_id,
         string calldata metas
     ) external eqgt_admin {
-        require(_proposals[proposal_id].state==BetUtils.ProposalState.Pending, "208");
-        _proposals[proposal_id].state = BetUtils.ProposalState.Rejected;
-        emit BetUtils.EventReviewed(proposal_id, 0, false, metas);
+        require(_proposals.length>proposal_id, "404");
+        BetUtils.Proposal storage proposal = _proposals[proposal_id];
+        require(proposal.state==BetUtils.ProposalState.Pending, "208");
+        proposal.state = BetUtils.ProposalState.Rejected;
+        emit BetUtils.EventReviewed(proposal_id, type(uint256).max, false, metas);
     }
     function eventTogglePause(
         uint256 event_id,
