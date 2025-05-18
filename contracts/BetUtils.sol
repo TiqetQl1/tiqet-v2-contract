@@ -191,8 +191,10 @@ library BetUtils {
         uint256 option, 
         uint256 stake
     ) internal {
-        // update weights ...
+        // calc prize ...
         int128 fixed_stake = stake.fromUInt();
+        uint256 prize = (fixed_stake.mul(get_odd(bet, option))).toUInt();
+        // update weights ...
         bet.m[option] = bet.m[option].add(fixed_stake);
         int128 current_product=(uint256 (1)).fromUInt();
         for (uint256 i = 0; i < bet.options_count; i++) {
@@ -209,8 +211,6 @@ library BetUtils {
             if (i == option) continue;
             bet.m[i] = safe_pow(bet.m[i], logg);
         }
-        // calc prize ...
-        uint256 prize = (fixed_stake.mul(get_odd(bet, option))).toUInt();
         // fill wager instance ...
         bet.handle    = bet.handle + stake;
         wager.event_id = bet.id;
