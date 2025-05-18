@@ -6,7 +6,6 @@ import "abdk-libraries-solidity/ABDKMath64x64.sol";
 /// @title BetUtils
 /// @author [KAYT33N](https://github.com/KAYT33N)
 /// @notice Holds the codes related to Events and betting
-/// @dev Explain to a developer any extra details
 library BetUtils {
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
