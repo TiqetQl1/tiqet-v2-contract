@@ -152,9 +152,18 @@ library BetUtils {
         uint256 amount
     );
 
-    // Bets
+    
+    /// @notice Fills an instance of the event with data
+    /// @param bet instance of the event to be filled
+    /// @param proposal The proposal that leaded to this
+    /// @param id id of the event in the _events array
+    /// @param max_per_one_bet (refere to `Event` struct)
+    /// @param options_count (refere to `Event` struct)
+    /// @param fake_liq_per_option (refere to `Event` struct)
+    /// @param vig (refere to `Event` struct)
     function build(
         Event storage bet,
+        Proposal storage proposal,
         uint256 id,
         uint256 max_per_one_bet,
         uint256 options_count,
@@ -175,6 +184,10 @@ library BetUtils {
         bet.vig = vig;
         bet.state = EventState.Paused;
     }
+    /// @notice Changes an Events state and emits the event 
+    /// @param bet Instance to be updated
+    /// @param state New state
+    /// @param description More description on this change
     function change_state(
         Event storage bet,
         EventState state,
@@ -184,7 +197,15 @@ library BetUtils {
         emit EventChanged(bet.id, state, to_string(state), description);
     }
 
-    // Wagers
+    /// @notice Makes a new wager
+    /// @dev Steps are :
+    /// - Calculate prize with current odd
+    /// - Update weights and odds
+    /// - Save wager info
+    /// @param bet The event to bet on
+    /// @param wager The wager instance to be filled
+    /// @param option The outcome to put stake on
+    /// @param stake The amount of money to put on that outcome
     function make_wager(
         Event storage bet,
         Wager storage wager,
@@ -219,6 +240,11 @@ library BetUtils {
         wager.stake   = stake;
         wager.prize   = prize;
     }
+    /// @notice To find winning chance of an outcome
+    /// @param bet -
+    /// @param option -
+    /// @return int128 This is NOT a normal int, rather is a `float` 
+    /// and should be handled with `ABDKMath64x64`
     function get_chance(
         Event storage bet,
         uint256 option
@@ -226,6 +252,11 @@ library BetUtils {
         int128 total = sum_array(bet.m);
         return bet.m[option].div(total);
     }
+    /// @notice To find odd of an outcome
+    /// @param bet -
+    /// @param option -
+    /// @return int128 This is NOT a normal int, rather is a `float` 
+    /// and should be handled with `ABDKMath64x64`
     function get_odd(
         Event storage bet,
         uint256 option
@@ -244,6 +275,13 @@ library BetUtils {
         int128 odd = safe_pow(ABDKMath64x64.fromUInt(1).div(chance), exponent);
         return odd;
     }
+
+    // Helpers
+
+    /// @notice Helper function to sum values of an array
+    /// @dev All int128 values are floats and cant be accessed directly
+    /// @param arr -
+    /// @return sum -
     function sum_array(
         int128[] storage arr
     ) internal view returns (int128 sum) {
@@ -252,8 +290,12 @@ library BetUtils {
             sum = sum.add(arr[i]);
         }
     }
-
-    // Helpers
+    /// @notice Calculates base raised to the power of exp (base^exp) using natural logarithms and exponentials.
+    /// @dev Supports fractional and negative exponents. Reverts if base <= 0.
+    /// All int128 values are floats and cant be accessed directly
+    /// @param base -
+    /// @param exp -
+    /// @return int128
     function safe_pow(
         int128 base, 
         int128 exp
@@ -263,6 +305,15 @@ library BetUtils {
         int128 scaled = lnBase.mul(exp);
         return scaled.exp(); // base^exp
     }
+    /// @notice Moves a number from one range to another
+    /// @dev e.g (0, 10, 3, 20, 30) -> 23
+    /// All int128 values are floats and cant be accessed directly
+    /// @param inMin start of first range
+    /// @param inMax end of first range
+    /// @param value the number to change range
+    /// @param outMin start of second range
+    /// @param outMax end of second range
+    /// @return int128 -
     function map(
         int128 inMin,
         int128 inMax,
@@ -276,6 +327,9 @@ library BetUtils {
         int128 norm = value.sub(inMin).div(inRange);
         return norm.mul(outRange).add(outMin);
     }
+    /// @notice returns name string of the states
+    /// @param state -
+    /// @return string -
     function to_string(
         EventState state
     ) internal pure returns (string memory) {
