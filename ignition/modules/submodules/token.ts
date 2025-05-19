@@ -1,11 +1,11 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { Wallet } from "ethers";
-import PRIVATE_KEYS from "../accounts";
+import PRIVATE_KEYS from "../../accounts";
 
-export default buildModule("TiQetNFT", (m) => {
+export default buildModule("token", (m) => {
     const signers = PRIVATE_KEYS.map(key=>new Wallet(key))
     const owner   = signers[0]
-    const tiqetNFT = m.contract("TiQetNFT", []);
+    const token = m.contract("TestERC20Token", [owner.address]);
 
-    return { tiqetNFT };
+    return { token };
 });
