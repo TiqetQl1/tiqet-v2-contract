@@ -1,7 +1,7 @@
 {
   "name": "tiqet-v2",
   "scripts": {
-    "ignite": "npx hardhat ignition deploy ignition/modules/%npm_config_file%.ts --network localhost"
+    "ignite": "npx hardhat ignition deploy ignition/modules/bootstrap.ts --network localhost"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
