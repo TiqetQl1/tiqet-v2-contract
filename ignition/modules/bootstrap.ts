@@ -2,9 +2,9 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules"
 import { Wallet } from "ethers";
 import PRIVATE_KEYS from "../accounts";
 
-import _nft from "./submodules/nft"
-import _qusdt from "./submodules/qusdt";
-import _token from "./submodules/token";
+import _nft from "./contracts/nft"
+import _qusdt from "./contracts/qusdt";
+import _token from "./contracts/token";
 
 const FEE = 100
 const QUSDT_BALANCE_SIGNERS   = 1000
