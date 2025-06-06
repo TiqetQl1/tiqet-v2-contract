@@ -210,8 +210,54 @@ contract Core is AccessControl, Treasury{
         wager.is_paid = true;
     }
 
-    function clientPagination(
-        uint256 per_page,
-        uint256 start_index
-    ) external {}
+    function clientProposalsLength(
+    ) external view returns (uint256) {
+        return _proposals.length;
+    }
+    function clientEventsLength(
+    ) external view returns (uint256) {
+        return _events.length;
+    }
+    function clientWagersLength(
+        uint256 event_id,
+        address addr
+    ) external view returns (uint256) {
+        return _wagers[event_id][addr].length;
+    }
+
+    struct ClientEvent{
+        uint256 proposal_id;
+        uint256 id;
+        address creator;
+        uint256 options_count;
+        uint256 max_per_one_bet;
+        uint256 [] chance;
+        uint256 [] odd;
+        uint256 handle;
+        uint256 winner;
+        uint256 vig;
+        BetUtils.EventState state;
+    }
+    function clientEventGet(
+        uint256 event_id
+    ) external view returns(ClientEvent memory details){
+        require(event_id<_events.length, "404");
+        BetUtils.Event storage bet = _events[event_id];
+        details.proposal_id = bet.proposal_id;
+        details.id = bet.id;
+        details.creator = bet.creator;
+        details.options_count = bet.options_count;
+        details.max_per_one_bet = bet.max_per_one_bet;
+        details.chance = new uint[](details.options_count);
+        details.odd    = new uint[](details.options_count);
+        int128 DEC = BetUtils.DECIMALS.fromUInt();
+        for (uint i = 0; i < details.options_count; i++) {
+            details.chance[i] = bet.get_chance(i).mul(DEC).toUInt();
+            details.odd[i]    = bet.get_odd(i).mul(DEC).toUInt();
+        }
+        details.handle = bet.handle;
+        details.winner = bet.winner;
+        details.vig = bet.vig;
+        details.state = bet.state;
+    }
 }
