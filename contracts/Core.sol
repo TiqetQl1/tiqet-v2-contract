@@ -21,7 +21,7 @@ contract Core is AccessControl, Treasury{
     constructor (address token, address qusdt) Treasury(token, qusdt) {}
 
     /// @notice will hold all proposals, accepted or not
-    BetUtils.Proposal[] _proposals;
+    BetUtils.Proposal[] public _proposals;
 
     /// @notice holds states and data thats needed contract side
     BetUtils.Event[] public  _events;
