@@ -168,8 +168,17 @@ contract Core is AccessControl, Treasury{
         require(stake>0 && stake<=bet.max_per_one_bet, "403");
         address wallet = msg.sender;
         treasury_token_collect(wallet, stake);
+        uint256 wager_id = _wagers[event_id][wallet].length;
         BetUtils.Wager storage raw_wager = _wagers[event_id][wallet].push();
         bet.make_wager(raw_wager, option, stake);
+        emit BetUtils.WagerMade(
+            event_id,
+            wager_id,
+            wallet,
+            option,
+            raw_wager.stake,
+            raw_wager.prize
+        );
     }
     /// @notice Claims prize and gives creator the vig if bet is resolved
     /// @param event_id -
@@ -191,6 +200,18 @@ contract Core is AccessControl, Treasury{
         treasury_token_give(bet.creator, vig);
         treasury_token_give(wallet, (wager.prize)-vig);
         wager.is_paid = true;
+        emit BetUtils.VigPayed(
+            event_id,
+            wager_id,
+            bet.creator,
+            vig
+        );
+        emit BetUtils.WagerClaimed(
+            event_id,
+            wager_id,
+            wallet,
+            (wager.prize)-vig
+        );
     }
     /// @notice Refunds original stake if bet is disqualified
     /// @param event_id -
@@ -208,6 +229,12 @@ contract Core is AccessControl, Treasury{
         BetUtils.Wager storage wager = _wagers[event_id][wallet][wager_id];
         treasury_token_give(wallet, wager.stake);
         wager.is_paid = true;
+        emit BetUtils.WagerRefunded(
+            event_id,
+            wager_id,
+            wallet,
+            wager.prize
+        );
     }
 
     function clientProposalsLength(
