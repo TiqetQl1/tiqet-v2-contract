@@ -152,42 +152,6 @@ contract Core is AccessControl, Treasury{
         bet.change_state(BetUtils.EventState.Resolved, description);
     }
 
-    function getOdd(
-        uint256 event_id,
-        uint256 option
-    ) external view returns(uint256) {
-        return _events[event_id]
-            .get_odd(option)
-            .mul(ABDKMath64x64.fromUInt(BetUtils.DECIMALS))
-            .toUInt();
-    }
-    function getChance(
-        uint256 event_id,
-        uint256 option
-    ) external view returns(uint256) {
-        return _events[event_id]
-            .get_chance(option)
-            .mul(ABDKMath64x64.fromUInt(BetUtils.DECIMALS))
-            .toUInt();
-    }
-
-    struct Debug{
-        uint id;
-        uint[] m;
-        uint k;
-    }
-    function debug(
-        uint256 event_id
-    ) external view returns(Debug memory str) {
-        BetUtils.Event storage bet = _events[event_id];
-        str.id = event_id;
-        str.m = new uint[](bet.options_count);
-        for (uint256 i = 0; i < bet.m.length; i++) {
-            str.m[i] = (bet.m[i].mul(BetUtils.DECIMALS.fromUInt()).toUInt());
-        }
-        str.k = bet.k.toUInt();
-    }
-
     /// @notice Bets on an bet's outcome
     /// @param event_id -
     /// @param option The outcome to bet on
