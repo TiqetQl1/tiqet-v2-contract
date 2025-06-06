@@ -1,0 +1,35 @@
+{
+    "title": "An accepted event with a semi long title",
+    "image": "https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg",
+    "text": "This is an test only event with a semi long description : \n\nLorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu.",
+    "options": [
+        {
+            "id": 3,
+            "title": "Fourth option",
+            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMJJAzgmGNSEFzb7x-xa461Oqot3o959gCqA&s",
+            "text": "Fourth desc",
+            "url": "https://www.google.com/search?q=4+image&sca_esv=f6bc877b3d7fa12d&sxsrf=AE3TifMyt3zElHMijt21o5qdmp_Z9IKCgg%3A1748850987128&ei=K1k9aMbQB9SskdUPpZWeeA&ved=0ahUKEwiGkunOodKNAxVUVqQEHaWKBw8Q4dUDCBA&uact=5&oq=4+image&gs_lp=Egxnd3Mtd2l6LXNlcnAiBzQgaW1hZ2UyBhAAGAcYHjIGEAAYBxgeMgYQABgHGB4yBhAAGAcYHjIGEAAYBxgeMgYQABgHGB4yBhAAGAcYHjIFEAAYgAQyBRAAGIAEMgUQABiABEjEBFAAWABwAHgBkAEAmAGiAqABogKqAQMyLTG4AQPIAQD4AQGYAgGgAsgCmAMAkgcDMy0xoAfSBrIHAzMtMbgHyALCBwM0LTHIByI&sclient=gws-wiz-serp#vhid=fPKZD3JZk2EFxM&vssid=_XFk9aJajL--D9u8ProKVyA0_40"
+        },
+        {
+            "id": 2,
+            "title": "Third option",
+            "image": "https://img.freepik.com/free-psd/number-illustration-isolated_23-2151463628.jpg?semt=ais_hybrid&w=740",
+            "text": "Third description here",
+            "url": "httphttps://www.google.com/search?q=3+image&oq=3+image&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg80gEIMTA0MmowajeoAgCwAgA&sourceid=chrome&ie=UTF-8#vhid=J5AACLzbA5aZ1M&vssid=_K1k9aMbQB9SskdUPpZWeeA_44"
+        },
+        {
+            "id": 1,
+            "title": "Second option",
+            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXt4p2UsrnTXAj7cpWDwWWLMPrAZ4ViwChjg&s",
+            "text": "And then this is the second one",
+            "url": "https://www.google.com/search?q=2+image&sca_esv=2fa4110dc5a9b4b6&sxsrf=AE3TifNI-pGgAGucP-pokFUlKlBBhiKZZg%3A1748787579785&ei=e2E8aPvYL7iP7NYPzpqAyQw&ved=0ahUKEwi7guyztdCNAxW4B9sEHU4NIMkQ4dUDCBA&uact=5&oq=2+image&gs_lp=Egxnd3Mtd2l6LXNlcnAiBzIgaW1hZ2UyBhAAGAcYHjIGEAAYBxgeMgYQABgHGB4yBhAAGAcYHjIGEAAYBxgeMgYQABgHGB4yBhAAGAcYHjIGEAAYBxgeMgYQABgHGB4yCBAAGAcYChgeSLUDUABYAHAAeAGQAQCYAZMCoAGTAqoBAzItMbgBA8gBAPgBAZgCAaACsQKYAwCSBwMzLTGgB6sGsgcDMy0xuAexAsIHAzQtMcgHGQ&sclient=gws-wiz-serp#vhid=YXWXfIl2gmf8GM&vssid=_uGE8aMGBNbyIxc8Ph9ic4AM_46"
+        },
+        {
+            "id": 0,
+            "title": "First option",
+            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFnfyAtoYfb2WC7avxnLz4KuUqlp30aE29wA&s",
+            "text": "This is the first options description",
+            "url": "https://www.google.com/search?q=1+image&sca_esv=2fa4110dc5a9b4b6&sxsrf=AE3TifODa80Q5u3kXkOV4ismkoL50smanw%3A1748787482703&ei=GmE8aN3aKtWrkdUPmuuZ-A0&ved=0ahUKEwjdz8aFtdCNAxXVVaQEHZp1Bt8Q4dUDCBA&uact=5&oq=1+image&gs_lp=Egxnd3Mtd2l6LXNlcnAiBzEgaW1hZ2UyChAAGLADGNYEGEcyChAAGLADGNYEGEcyChAAGLADGNYEGEcyChAAGLADGNYEGEcyChAAGLADGNYEGEcyChAAGLADGNYEGEcyChAAGLADGNYEGEcyChAAGLADGNYEGEcyDRAAGIAEGLADGEMYigUyGRAuGIAEGLADGNEDGEMYxwEYyAMYigXYAQEyExAuGIAEGLADGEMYyAMYigXYAQEyGRAuGIAEGLADGNEDGEMYxwEYyAMYigXYAQFIjglQwgZYlAhwAXgBkAEAmAGpAqABqQKqAQMyLTG4AQPIAQD4AQGYAgGgAheYAwCIBgGQBgy6BgQIARgIkgcBMaAH4QSyBwC4BwDCBwM0LTHIBxM&sclient=gws-wiz-serp#vhid=rwR19X-6Cf-ttM&vssid=_e2E8aPvYL7iP7NYPzpqAyQw_44"
+        }
+    ]
+}

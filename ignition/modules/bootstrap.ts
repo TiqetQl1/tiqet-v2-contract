@@ -1,10 +1,13 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules"
 import { Wallet } from "ethers";
 import PRIVATE_KEYS from "../accounts";
+import proposalJson from "./assets/proposal.json"
+import EventJson    from "./assets/event.json"
 
 import _nft from "./contracts/nft"
 import _qusdt from "./contracts/qusdt";
 import _token from "./contracts/token";
+import _core from "./contracts/core";
 
 const FEE = 100
 const QUSDT_BALANCE_SIGNERS   = 1000
@@ -20,7 +23,7 @@ export default buildModule("bootstrap", (m) => {
   const { qusdt } = m.useModule(_qusdt)
   const { token } = m.useModule(_token)
 
-  const core = m.contract("Core", [token, qusdt])
+  const { core } = m.useModule(_core)
 
   // add admin
   m.call(core, "authAdminAdd", [signers[1].address])
@@ -28,7 +31,7 @@ export default buildModule("bootstrap", (m) => {
   m.call(core, "authProposerAdd", [signers[2].address]) 
   // add holder
   m.call(core, "authNftAdd", [nft]) 
-  m.call(nft, "safeMint", [signers[4].address, 0])
+  m.call(nft, "safeMint", [signers[3].address, 0])
   // change fee
   m.call(core, "configProposalFee", [FEE])
 
@@ -40,6 +43,23 @@ export default buildModule("bootstrap", (m) => {
   }
   m.call(qusdt, "mint", [core, QUSDT_BALANCE_TREASURY])
   m.call(token, "mint", [core, TOKEN_BALANCE_TREASURY])
+  const approve = m.call(qusdt, "approve", [core, 2*FEE])
+
+  //
+  const p1 = m.call(core, "eventPropose"
+    , [JSON.stringify(proposalJson)]
+    , {id: "PROPOSAL_1",after:[approve]})
+  const p2 = m.call(core, "eventPropose"
+    , [JSON.stringify(proposalJson)]
+    , {id: "PROPOSAL_2",after:[approve]})
+
+  //
+  m.call(core, "eventAccept", [
+    0, 100, 1000, 4, 100, JSON.stringify(EventJson)
+  ], {id:"ACCEPT_1", after:[p1]})
+  m.call(core, "eventAccept", [
+    1, 100, 1000, 2, 100, JSON.stringify(EventJson)
+  ], {id:"ACCEPT_2",after:[p2]})
 
   return { core, qusdt, token, nft }
 });
