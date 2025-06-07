@@ -424,7 +424,7 @@ contract Pool{
 }
 
 contract TiQetV2_Lottery {
-    Pool[] pools;
+    Pool[]  public pools;
     address public _NFT;
     uint256 public _NFT_SUPPLY;
     address public _USDT;
@@ -539,6 +539,9 @@ contract TiQetV2_Lottery {
             pools.push(pool);
             emit PoolCreated(pool);
         }
+    }
+    function poolCount() external view returns (uint256) {
+        return pools.length;
     }
 
     /**
