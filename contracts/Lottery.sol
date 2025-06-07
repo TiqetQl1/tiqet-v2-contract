@@ -141,42 +141,44 @@ contract Pool{
 
 
     // --------=================== Exports ===================-------- //
-    function configs() external view returns ( 
-        address organizer,
-        uint256    time_end, 
-        uint256    time_start,
-        uint256    ticket_price_usdt,
-        uint256    max_tickets_total,  
-        uint256    max_participants,
-        uint256    max_tickets_of_participant,
-        uint256    winners_count,
-        uint256    cut_share,
-        uint256    cut_per_nft,
-        uint256    cut_per_winner
-        ) {
-            organizer                   = _organizer;
-            time_end                    = _time_end;
-            time_start                  = _time_start;
-            ticket_price_usdt           = _ticket_price_usdt;
-            max_tickets_total           = _max_tickets_total;
-            max_participants            = _max_participants;
-            max_tickets_of_participant  = _max_tickets_of_participant;
-            winners_count               = _winners_count;
-            cut_share                   = _cut_share;
-            cut_per_nft                 = _cut_per_nft;
-            cut_per_winner              = _cut_per_winner;
+    struct Configs {
+        address organizer;
+        uint256    time_end; 
+        uint256    time_start;
+        uint256    ticket_price_usdt;
+        uint256    max_tickets_total;  
+        uint256    max_participants;
+        uint256    max_tickets_of_participant;
+        uint256    winners_count;
+        uint256    cut_share;
+        uint256    cut_per_nft;
+        uint256    cut_per_winner;
+    }
+    function configs() external view returns (Configs memory data) {
+            data.organizer                   = _organizer;
+            data.time_end                    = _time_end;
+            data.time_start                  = _time_start;
+            data.ticket_price_usdt           = _ticket_price_usdt;
+            data.max_tickets_total           = _max_tickets_total;
+            data.max_participants            = _max_participants;
+            data.max_tickets_of_participant  = _max_tickets_of_participant;
+            data.winners_count               = _winners_count;
+            data.cut_share                   = _cut_share;
+            data.cut_per_nft                 = _cut_per_nft;
+            data.cut_per_winner              = _cut_per_winner;
     }
 
-    function states() external view returns ( 
-        Stage   stage_,
-        uint256 tickets_sold_,
-        uint256 buyers_count_,
-        uint256 raised_
-        ) {
-            stage_        = stage;
-            tickets_sold_ = tickets_total;
-            buyers_count_ = total_participants;
-            raised_       = poolTotal();
+    struct States {
+        Stage   stage;
+        uint256 tickets_sold;
+        uint256 buyers_count;
+        uint256 raised;
+    }
+    function states() external view returns (States memory data) {
+            data.stage        = stage;
+            data.tickets_sold = tickets_total;
+            data.buyers_count = total_participants;
+            data.raised       = poolTotal();
     }
 
     function results() external view returns ( 
