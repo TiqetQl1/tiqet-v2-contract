@@ -41,9 +41,9 @@ contract Pool{
     uint256    immutable _cut_per_nft;   // ... and then multiplied 
     uint256    immutable _cut_per_winner;// ... in these two.
     // Dependencies
-    address constant   _NFT_Contract  = 0x01c6acBC7E8DBD0a2256d0a769d046Cec92E248C;
+    address immutable  _NFT_Contract;
     uint256 immutable  _NFT_totalSupply;
-    address constant   _USDT_Contract = 0xC276b91c0e8D10260af7b67009d2683bB7776308;
+    address immutable  _USDT_Contract;
 
     // --------==================== Errors ====================-------- //
     error noTicketsLeft(uint256 total_after_transaction, uint256 max);
@@ -101,7 +101,7 @@ contract Pool{
 
     // --------=================  Constructor =================-------- //
     constructor(
-        address organizer,
+        address    organizer,
         uint256    time_end, 
         uint256    time_start,
         uint256    ticket_price_usdt,
@@ -111,8 +111,12 @@ contract Pool{
         uint256    winners_count,
         uint256    cut_share,
         uint256    cut_per_nft,
-        uint256    cut_per_winner
+        uint256    cut_per_winner,
+        address    _usdt,
+        address    _nft
         ) {
+            _USDT_Contract = _usdt;
+            _NFT_Contract  = _nft;
             _organizer = 
                 (organizer!=address(0)) 
                     ? organizer 
@@ -427,6 +431,8 @@ contract Pool{
 
 contract TiQetV2_Lottery {
     Pool[] pools;
+    address public _NFT;
+    address public _USDT;
 
     uint256 constant NOTFOUND = type(uint256).max;
 
@@ -476,6 +482,12 @@ contract TiQetV2_Lottery {
         return ((toCheck == GOD) || (adminIndex(toCheck)!=NOTFOUND));
     }
 
+    function setUSDT(address neww) public onlyAdmin {
+        _USDT = neww;
+    }
+    function setNFT(address neww) public onlyAdmin {
+        _NFT = neww;
+    }
 
     /**
       * returns a small number ( zero included) if the address is in the admins
@@ -526,7 +538,9 @@ contract TiQetV2_Lottery {
             winners_count,
             cut_share,
             cut_per_nft,
-            cut_per_winner
+            cut_per_winner,
+            _USDT,
+            _NFT
             );
         if (authIsAdmin(msg.sender)) {
             pools.push(pool);
