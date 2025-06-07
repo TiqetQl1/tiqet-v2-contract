@@ -425,9 +425,8 @@ contract Pool{
     }
 }
 
-contract TiQetV1 {
-    Pool[] closed_pools;
-    Pool[] active_pools;
+contract TiQetV2_Lottery {
+    Pool[] pools;
 
     uint256 constant NOTFOUND = type(uint256).max;
 
@@ -444,14 +443,13 @@ contract TiQetV1 {
         _;
     }
     modifier onlyAdmin{
-        if (!isAdmin(msg.sender)) {
+        if (!authIsAdmin(msg.sender)) {
             revert NotAuthorized();
         }
         _;
     }
 
     event PoolCreated(Pool indexed pool);
-    event PoolArchived(Pool indexed pool);
     event PoolRemoved(Pool indexed pool);
 
     constructor(){
@@ -461,20 +459,20 @@ contract TiQetV1 {
     /**
       * Admins management functions
       */
-    function transferGod(address ngod)  public onlyGOD{
+    function authTransferGod(address ngod)  public onlyGOD{
         GOD = ngod;
     }
-    function promote(address new_admin) public onlyGOD {
-        require(!isAdmin(new_admin), "Already admin");
+    function authPromote(address new_admin) public onlyGOD {
+        require(!authIsAdmin(new_admin), "Already admin");
         admins.push(new_admin);
     }
-    function demote(address old_admin)      public onlyGOD {
+    function authDemote(address old_admin)      public onlyGOD {
         uint256 index = adminIndex(old_admin);
         require(index != NOTFOUND, "Not an admin");
         admins[index] = admins[admins.length-1];
         admins.pop();
     }
-    function isAdmin(address toCheck)   public view returns (bool){
+    function authIsAdmin(address toCheck)   public view returns (bool){
         return ((toCheck == GOD) || (adminIndex(toCheck)!=NOTFOUND));
     }
 
@@ -495,29 +493,14 @@ contract TiQetV1 {
     /**
       * Functions to manage pools
       */
-    function popAt(uint256 index) private onlyAdmin {
-        active_pools[index] = active_pools[active_pools.length - 1];
-        active_pools.pop();
-    }
-    function dropPool(uint256 index, bool should_archive) public onlyAdmin {
-        if (should_archive) {
-            closed_pools.push(active_pools[index]);
-            emit PoolArchived(active_pools[index]);
-        }else{
-            emit PoolRemoved(active_pools[index]);
+    function poolDrop(uint256 index) private onlyAdmin {
+        uint256 len = pools.length;
+        for (uint i = index; i < len-1; i++) {
+            pools[i] = pools[i+1];
         }
-        popAt(index);
+        pools.pop();
     }
-    function importPool(Pool pool) public onlyAdmin{
-        active_pools.push(pool);
-    }
-    function allActives() external view returns(Pool[] memory) {
-        return active_pools;
-    }
-    function allArchived() external view returns(Pool[] memory) {
-        return closed_pools;
-    }
-    function newPool(
+    function poolNew(
         address    organizer,
         uint256    time_end, 
         uint256    time_start,
@@ -545,8 +528,8 @@ contract TiQetV1 {
             cut_per_nft,
             cut_per_winner
             );
-        if (isAdmin(msg.sender)) {
-            active_pools.push(pool);
+        if (authIsAdmin(msg.sender)) {
+            pools.push(pool);
             emit PoolCreated(pool);
         }
     }
