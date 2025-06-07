@@ -113,10 +113,12 @@ contract Pool{
         uint256    cut_per_nft,
         uint256    cut_per_winner,
         address    _usdt,
-        address    _nft
+        address    _nft,
+        uint256    _supply
         ) {
             _USDT_Contract = _usdt;
             _NFT_Contract  = _nft;
+            _NFT_totalSupply = _supply;
             _organizer = 
                 (organizer!=address(0)) 
                     ? organizer 
@@ -135,10 +137,6 @@ contract Pool{
             _cut_per_winner              = cut_per_winner;
 
             stage                        = Stage.Inited;
-            bytes memory _NFT_totalSupply_data = abi.encodeWithSignature("totalSupply()");
-            (bool success,bytes memory result) = _NFT_Contract.staticcall(_NFT_totalSupply_data);
-            require(success, "Error on gettin total supply");
-            (_NFT_totalSupply) = abi.decode(result, (uint256));
     }
 
 
@@ -432,6 +430,7 @@ contract Pool{
 contract TiQetV2_Lottery {
     Pool[] pools;
     address public _NFT;
+    uint256 public _NFT_SUPPLY;
     address public _USDT;
 
     uint256 constant NOTFOUND = type(uint256).max;
@@ -488,6 +487,9 @@ contract TiQetV2_Lottery {
     function setNFT(address neww) public onlyAdmin {
         _NFT = neww;
     }
+    function setNftSupply(uint256 neww) public onlyAdmin {
+        _NFT_SUPPLY = neww;
+    }
 
     /**
       * returns a small number ( zero included) if the address is in the admins
@@ -540,7 +542,8 @@ contract TiQetV2_Lottery {
             cut_per_nft,
             cut_per_winner,
             _USDT,
-            _NFT
+            _NFT,
+            _NFT_SUPPLY
             );
         if (authIsAdmin(msg.sender)) {
             pools.push(pool);
