@@ -29,15 +29,15 @@ contract Pool{
     // --------=============== Config variables ===============-------- //
     address    immutable _organizer;
     uint256    immutable _time_end;      // These times are mostly used in ...
-    uint256    immutable _time_start;    // ... the Front-end due to the lack of oracles
+    uint256    constant _time_start = 0;    // ... the Front-end due to the lack of oracles
     // Rules
     uint256    immutable _ticket_price_usdt; //
     uint256    immutable _max_tickets_total; // total count of tickets (0=limitless)
     uint256    immutable _max_participants; // limit of tickets buyers (0=limitless)
-    uint256    immutable _max_tickets_of_participant; // limit of tickets per buyer (0=limitless)
+    uint256    constant  _max_tickets_of_participant = 0; // limit of tickets per buyer (0=limitless)
     // Prizes
     uint256    immutable _winners_count; //
-    uint256    immutable _cut_share;     // Total money raised will be divided buy this
+    uint256    constant  _cut_share = 10000;     // Total money raised will be divided buy this
     uint256    immutable _cut_per_nft;   // ... and then multiplied 
     uint256    immutable _cut_per_winner;// ... in these two.
     // Dependencies
@@ -103,13 +103,10 @@ contract Pool{
     constructor(
         address    organizer,
         uint256    time_end, 
-        uint256    time_start,
         uint256    ticket_price_usdt,
         uint256    max_tickets_total,  
         uint256    max_participants,
-        uint256    max_tickets_of_participant,
         uint256    winners_count,
-        uint256    cut_share,
         uint256    cut_per_nft,
         uint256    cut_per_winner,
         address    _usdt,
@@ -124,15 +121,12 @@ contract Pool{
                     ? organizer 
                     : msg.sender;
             _time_end                    = time_end;
-            _time_start                  = time_start;
 
             _ticket_price_usdt           = ticket_price_usdt;
             _max_tickets_total           = max_tickets_total;
             _max_participants            = max_participants;
-            _max_tickets_of_participant  = max_tickets_of_participant;
             
             _winners_count               = winners_count;
-            _cut_share                   = cut_share;
             _cut_per_nft                 = cut_per_nft;
             _cut_per_winner              = cut_per_winner;
 
@@ -519,13 +513,10 @@ contract TiQetV2_Lottery {
     function poolNew(
         address    organizer,
         uint256    time_end, 
-        uint256    time_start,
         uint256    ticket_price_usdt,
         uint256    max_tickets_total,  
         uint256    max_participants,
-        uint256    max_tickets_of_participant,
         uint256    winners_count,
-        uint256    cut_share,
         uint256    cut_per_nft,
         uint256    cut_per_winner
         ) external returns (Pool pool){
@@ -534,13 +525,10 @@ contract TiQetV2_Lottery {
                     ? organizer 
                     : msg.sender,
             time_end, 
-            time_start,
             ticket_price_usdt,
             max_tickets_total,  
             max_participants,
-            max_tickets_of_participant,
             winners_count,
-            cut_share,
             cut_per_nft,
             cut_per_winner,
             _USDT,
