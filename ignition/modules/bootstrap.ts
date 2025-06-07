@@ -3,11 +3,13 @@ import { Wallet } from "ethers";
 import PRIVATE_KEYS from "../accounts";
 import proposalJson from "./assets/proposal.json"
 import EventJson    from "./assets/event.json"
+import LotteryJSON  from  "./assets/lottery.json"
 
 import _nft from "./contracts/nft"
 import _qusdt from "./contracts/qusdt";
 import _token from "./contracts/token";
 import _core from "./contracts/core";
+import _lottery from "./contracts/lottery"
 
 const FEE = 100
 const QUSDT_BALANCE_SIGNERS   = 1000
@@ -24,6 +26,8 @@ export default buildModule("bootstrap", (m) => {
   const { token } = m.useModule(_token)
 
   const { core } = m.useModule(_core)
+
+  const { lottery } = m.useModule(_lottery)
 
   // add admin
   m.call(core, "authAdminAdd", [signers[1].address])
@@ -61,5 +65,27 @@ export default buildModule("bootstrap", (m) => {
     1, 100, 1000, 2, 100, JSON.stringify(EventJson)
   ], {id:"ACCEPT_2",after:[p2]})
 
-  return { core, qusdt, token, nft }
+  // lottery
+  const l1 = m.call(lottery, "setUSDT", [qusdt])
+  const l2 = m.call(lottery, "setNFT", [nft])
+  const l3 = m.call(lottery, "setNftSupply", [1])
+  const payload = [
+    LotteryJSON.organizer,
+    Math.floor(Date.now()/1000)+7200,
+    Math.floor(Date.now()/1000),
+    LotteryJSON.ticket_price_usdt,
+    LotteryJSON.max_tickets_total,
+    LotteryJSON.max_participants,
+    LotteryJSON.max_tickets_of_participant,
+    LotteryJSON.winners_count,
+    LotteryJSON.cut_share,
+    LotteryJSON.cut_per_nft,
+    LotteryJSON.cut_per_winner,
+  ]
+  m.call(lottery, "poolNew", payload, {id: "PoolNo1", after:[l1, l2, l3]})
+  payload[1] = 0
+  m.call(lottery, "poolNew", payload, {id: "PoolNo2", after:[l1, l2, l3]})
+  m.call(lottery, "poolNew", payload, {id: "PoolNo3", after:[l1, l2, l3]})
+
+  return { core, qusdt, token, nft, lottery }
 });

@@ -1,0 +1,13 @@
+{
+    "organizer": "0x0000000000000000000000000000000000000000",
+    "time_end": 0,
+    "time_start": 0,
+    "ticket_price_usdt": 1000000,
+    "max_tickets_total": 0,
+    "max_participants": 0,
+    "max_tickets_of_participant": 0,
+    "winners_count": 1,
+    "cut_share": 100,
+    "cut_per_nft": 1,
+    "cut_per_winner": 65
+}
