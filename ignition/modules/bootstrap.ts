@@ -11,11 +11,11 @@ import _token from "./contracts/token";
 import _core from "./contracts/core";
 import _lottery from "./contracts/lottery"
 
-const FEE = 100
-const QUSDT_BALANCE_SIGNERS   = 1000
+const FEE = 2000000
+const QUSDT_BALANCE_SIGNERS   = 1000000000
 const QUSDT_BALANCE_TREASURY  = 0
-const TOKEN_BALANCE_SIGNERS   = 1000
-const TOKEN_BALANCE_TREASURY   = 6000
+const TOKEN_BALANCE_SIGNERS   = 100000000
+const TOKEN_BALANCE_TREASURY   = 25000000000
 
 const mask_address = (addr: string) => `${addr.slice(0,6)}___${addr.slice(-4)}` 
 
