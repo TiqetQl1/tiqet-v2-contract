@@ -14,8 +14,8 @@ import _lottery from "./contracts/lottery"
 const FEE = 2000000
 const QUSDT_BALANCE_SIGNERS   = 1000000000
 const QUSDT_BALANCE_TREASURY  = 0
-const TOKEN_BALANCE_SIGNERS   = 100000000
-const TOKEN_BALANCE_TREASURY   = 25000000000
+const TOKEN_BALANCE_SIGNERS   = 500000000
+const TOKEN_BALANCE_TREASURY   = 2500000000
 
 const mask_address = (addr: string) => `${addr.slice(0,6)}___${addr.slice(-4)}` 
 
