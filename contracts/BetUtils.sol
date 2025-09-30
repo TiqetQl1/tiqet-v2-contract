@@ -11,7 +11,7 @@ library BetUtils {
     using ABDKMath64x64 for uint256;
     
     /// @notice Used for converting float to int and in reverse
-    uint256 public constant DECIMALS = 10_000;
+    uint256 public constant DECIMALS = 1_000;
 
     /// @notice States that an event can be in
     enum EventState {
